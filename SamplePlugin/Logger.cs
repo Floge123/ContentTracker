@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MentorRouletteCounter
 {
     internal static class Logger
     {
-        private const string LogPath = "D:\\Bibliothek\\Dokumente\\MentorRoulette\\Log.txt";
+        private static readonly string LogPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\Log.txt";
 
         static Logger()
         {

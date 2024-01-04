@@ -9,8 +9,8 @@ namespace MentorRouletteCounter
 {
     internal sealed class DutyTracker
     {
-        private const string ExportPath = "D:\\Bibliothek\\Dokumente\\MentorRoulette\\Export.txt";
-        private const string ExportMentorRoulettePath = "D:\\Bibliothek\\Dokumente\\MentorRoulette\\Export_Mentor.txt";
+        private static readonly string ExportPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\Export.txt";
+        private static readonly string ExportMentorRoulettePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\Export_Mentor.txt";
 
         private IList<DutyEntry> _doneDuties;
         private IList<DutyEntry> _doneMentorDuties;

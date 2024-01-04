@@ -1,5 +1,3 @@
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
@@ -21,8 +19,11 @@ namespace MentorRouletteCounter
             var all = Service.GameData.GetExcelSheet<ContentFinderCondition>().Where(d => d.ContentType?.Value != null).ToList();
             Dungeons = all.Where(d => d.ContentType.Value.Name == "Dungeons").Select(d => d.Name.RawString).ToList();
             NormalRaids = all.Where(d => d.ContentType.Value.Name == "Raids" && d.ContentMemberType.Value.TanksPerParty > 1).Select(d => d.Name.RawString).ToList();
-            NormalTrials = all.Where(d => d.ContentType.Value.Name == "Trials" && !d.Name.RawString.Contains("(Extreme)")).Select(d => d.Name.RawString).ToList();
-            ExtremeTrials = all.Where(d => d.ContentType.Value.Name == "Trials" && d.Name.RawString.Contains("(Extreme)")).Select(d => d.Name.RawString).ToList();
+            NormalTrials = all.Where(d => d.ContentType.Value.Name == "Trials"
+                && !d.Name.RawString.Contains("(Extreme)") 
+                && !d.Name.RawString.Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase)).Select(d => d.Name.RawString).ToList();
+            ExtremeTrials = all.Where(d => d.ContentType.Value.Name == "Trials" 
+                && (d.Name.RawString.Contains("(Extreme)") || d.Name.RawString.Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase))).Select(d => d.Name.RawString).ToList();
             AllianceRaids = all.Where(d => d.ContentType.Value.Name == "Raids" && d.ContentMemberType.Value.TanksPerParty == 1).Select(d => d.Name.RawString).ToList();
             Guildhests = all.Where(d => d.ContentType.Value.Name == "Guildhests").Select(d => d.Name.RawString).ToList();
         }
