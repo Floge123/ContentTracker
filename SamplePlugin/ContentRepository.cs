@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SamplePlugin
+namespace MentorRouletteCounter
 {
     internal static class ContentRepository
     {
@@ -30,12 +30,12 @@ namespace SamplePlugin
         public static IList<DutyEntry> GetBlankDutyEntyList()
         {
             var list = new List<DutyEntry>();
-            Dungeons.ForEach(d => list.Add(new DutyEntry(d, GetContentTypeForDuty(d))));
-            NormalRaids.ForEach(d => list.Add(new DutyEntry(d, GetContentTypeForDuty(d))));
-            NormalTrials.ForEach(d => list.Add(new DutyEntry(d, GetContentTypeForDuty(d))));
-            ExtremeTrials.ForEach(d => list.Add(new DutyEntry(d, GetContentTypeForDuty(d))));
-            AllianceRaids.ForEach(d => list.Add(new DutyEntry(d, GetContentTypeForDuty(d))));
-            Guildhests.ForEach(d => list.Add(new DutyEntry(d, GetContentTypeForDuty(d))));
+            Dungeons.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            NormalRaids.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            NormalTrials.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            ExtremeTrials.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            AllianceRaids.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            Guildhests.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
 
             return list;
         }

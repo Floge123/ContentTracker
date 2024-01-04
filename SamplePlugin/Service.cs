@@ -3,7 +3,7 @@ using Dalamud.IoC;
 using Dalamud.Plugin.Services;
 using Dalamud.Plugin;
 
-namespace SamplePlugin
+namespace MentorRouletteCounter
 {
     public class Service
     {
@@ -20,7 +20,7 @@ namespace SamplePlugin
         [PluginService][RequiredVersion("1.0")] public static IGameInteropProvider Interop { get; private set; } = null!;
         [PluginService][RequiredVersion("1.0")] public static IClientState Client { get; private set; } = null!;
         [PluginService][RequiredVersion("1.0")] public static IDutyState Duty { get; private set; } = null!;
-        
+
         // @formatter:on
     }
 }

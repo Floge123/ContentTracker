@@ -1,13 +1,15 @@
 {
-  "Author": "your name here",
-  "Name": "Sample Plugin",
-  "Punchline": "A short one-liner that shows up in /xlplugins.",
+  "Author": "Leni Tachikawa",
+  "Name": "Duty Tracker",
+  "Punchline": "Track duties completed with special attention to mentor roulettes.",
   "Description": "A description that shows up in /xlplugins. List any major slash-command(s).",
   "InternalName": "samplePlugin",
   "ApplicableVersion": "any",
   "Tags": [
     "sample",
     "plugin",
-    "goats"
+    "goats",
+    "tracker",
+    "mentor"
   ]
 }
