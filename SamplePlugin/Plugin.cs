@@ -3,6 +3,7 @@ using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
 using Lumina.Excel.GeneratedSheets;
 using System;
+using System.Linq;
 
 namespace MentorRouletteCounter
 {
@@ -26,7 +27,7 @@ namespace MentorRouletteCounter
 
             try
             {
-                _dutyTracker = new DutyTracker();
+                _dutyTracker = new DutyTracker();            
                 Service.Duty.DutyStarted += Duty_DutyStarted;
                 Service.Duty.DutyCompleted += Duty_DutyCompleted;
             }

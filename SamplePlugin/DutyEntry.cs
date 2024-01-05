@@ -1,44 +1,42 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MentorRouletteCounter
 {
-    internal sealed class DutyEntry
+    internal class DutyEntry
     {
+        public DateTime TimeStamp { get; set; }
         public string Name { get; set; }
         public DutyType Type { get; set; }
-        public int Count { get; set; }
-        public List<TimeSpan> Times { get; set; }
+        public TimeSpan ElapsedTime { get; set; }
+        public string JobName { get; set; }
 
-        public DutyEntry(DutyType type, string name)
+        public DutyEntry(DateTime timeStamp, DutyType type, string name, TimeSpan time, string jobName)
         {
+            TimeStamp = timeStamp;
             Name = name;
             Type = type;
-            Count = 0;
-            Times = new List<TimeSpan>();
+            ElapsedTime = time;
+            JobName = jobName;
         }
 
         public static DutyEntry FromCsv(string[] csv)
         {
-            var duty = new DutyEntry(Enum.Parse<DutyType>(csv[0]), csv[1]);
-            duty.Count = int.Parse(csv[2]);
-            duty.Times = new List<TimeSpan>();
-            if (TimeSpan.TryParse(csv[3], out TimeSpan time))
+            var timestamp = DateTime.Now;
+            if (DateTime.TryParse(csv[0], out DateTime dt))
             {
-                duty.Times.Add(time);
+                timestamp = dt;
             }
-            return duty;
+            var time = TimeSpan.Zero;
+            if (TimeSpan.TryParse(csv[3], out TimeSpan t))
+            {
+                time = t;
+            }
+            return new DutyEntry(timestamp, Enum.Parse<DutyType>(csv[1]), csv[2], time, csv[4]);
         }
 
         public string AsCsv()
         {
-            var averageTime = TimeSpan.Zero;
-            if (Times.Any())
-            {
-                averageTime = new TimeSpan(Convert.ToInt64(Times.Average(t => t.Ticks)));
-            }
-            return $"{Type},{Name},{Count},{averageTime}";
+            return $"{TimeStamp},{Type},{Name},{ElapsedTime},{JobName}";
         }
     }
 }

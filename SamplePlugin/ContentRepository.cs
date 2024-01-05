@@ -28,15 +28,15 @@ namespace MentorRouletteCounter
             Guildhests = all.Where(d => d.ContentType.Value.Name == "Guildhests").Select(d => d.Name.RawString).ToList();
         }
 
-        public static IList<DutyEntry> GetBlankDutyEntyList()
+        public static IList<SummaryDutyEntry> GetBlankDutyEntyList()
         {
-            var list = new List<DutyEntry>();
-            Dungeons.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
-            NormalRaids.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
-            NormalTrials.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
-            ExtremeTrials.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
-            AllianceRaids.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
-            Guildhests.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            var list = new List<SummaryDutyEntry>();
+            Dungeons.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
+            NormalRaids.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
+            NormalTrials.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
+            ExtremeTrials.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
+            AllianceRaids.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
+            Guildhests.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
 
             return list;
         }
