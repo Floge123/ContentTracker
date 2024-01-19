@@ -16,7 +16,7 @@ namespace MentorRouletteCounter
         {
             PathHelper.EnsurePathExists(LogPath);
             using StreamWriter writer = File.AppendText(LogPath);
-            writer.WriteLine($"[{DateTime.Now:yyyy-dd-MM HH:mm:ss}] {message}");
+            writer.WriteLine($"[{DateTime.Now}] {message}");
         }
     }
 }
