@@ -50,7 +50,7 @@ namespace MentorRouletteCounter
             PathHelper.EnsurePathExists(ExportPath);
 
             using StreamWriter writer = new StreamWriter(ExportPath, true);
-            writer.WriteLine($"{DateTime.Now:yyyy-dd-mm hh:mm:ss},{gil}");
+            writer.WriteLine($"{DateTime.Now},{gil}");
         }
 
         private unsafe long GetRetainerGil()
