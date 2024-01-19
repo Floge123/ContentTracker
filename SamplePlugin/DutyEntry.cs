@@ -2,7 +2,7 @@ using System;
 
 namespace MentorRouletteCounter
 {
-    internal class DutyEntry
+    internal class DutyEntry : IEquatable<DutyEntry>
     {
         public DateTime TimeStamp { get; set; }
         public string Name { get; set; }
@@ -36,7 +36,16 @@ namespace MentorRouletteCounter
 
         public string AsCsv()
         {
-            return $"{TimeStamp},{Type},{Name},{ElapsedTime},{JobName}";
+            return $"{TimeStamp},{Type},{Name.Replace(",", ";")},{ElapsedTime},{JobName}";
+        }
+
+        public bool Equals(DutyEntry? other)
+        {
+            if (other  == null) return false;
+
+            if (ReferenceEquals(this, other)) return true;
+
+            return Name == other.Name && Type == other.Type && ElapsedTime == other.ElapsedTime && JobName == other.JobName && TimeStamp == other.TimeStamp;
         }
     }
 }

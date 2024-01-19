@@ -32,11 +32,13 @@ namespace MentorRouletteCounter
 
         public void Start()
         {
+            Logger.Log("Duty started");
             _currentStartTime = DateTime.Now;
         }
 
         public void End(ContentFinderCondition content)
         {
+            Logger.Log("Done Duty " + content.Name);
             _currentEndTime = DateTime.Now;
             var elapsedTime = _currentEndTime - _currentStartTime;
             StoreDoneDuty(content, elapsedTime);

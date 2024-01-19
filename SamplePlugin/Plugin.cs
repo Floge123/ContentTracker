@@ -1,15 +1,15 @@
 using Dalamud.IoC;
 using Dalamud.Plugin;
-using Dalamud.Interface.Windowing;
 using Lumina.Excel.GeneratedSheets;
 using System;
-using System.Linq;
 
 namespace MentorRouletteCounter
 {
     public sealed class Plugin : IDalamudPlugin
     {
         private readonly DutyTracker _dutyTracker;
+        private readonly GilTracker _gilTracker;
+        private bool _enteringContent;
 
         public string Name => "Mentor Roulette Tracker";
 
@@ -27,14 +27,33 @@ namespace MentorRouletteCounter
 
             try
             {
-                _dutyTracker = new DutyTracker();            
+                _dutyTracker = new DutyTracker();               
                 Service.Duty.DutyStarted += Duty_DutyStarted;
+                Service.Client.CfPop += Client_CfPop;
                 Service.Duty.DutyCompleted += Duty_DutyCompleted;
+                Service.Client.TerritoryChanged += Client_TerritoryChanged;
+
+                _gilTracker = new GilTracker(TimeSpan.FromSeconds(10));
+                _gilTracker.Start();
             }
             catch (Exception ex)
             {
                 Logger.Log(ex.ToString());
             }
+        }
+
+        private void Client_TerritoryChanged(ushort obj)
+        {
+            if (_enteringContent)
+            {
+                _enteringContent = false;
+                _dutyTracker.Start();
+            }
+        }
+
+        private void Client_CfPop(ContentFinderCondition obj)
+        {
+            _enteringContent = true;
         }
 
         private void Duty_DutyStarted(object? sender, ushort e)
@@ -60,6 +79,9 @@ namespace MentorRouletteCounter
         {
             Service.Duty.DutyStarted -= Duty_DutyStarted;
             Service.Duty.DutyCompleted -= Duty_DutyCompleted;
+            Service.Client.CfPop -= Client_CfPop;
+            Service.Client.TerritoryChanged -= Client_TerritoryChanged;
+            _gilTracker.Stop();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace MentorRouletteCounter
 {
-    internal sealed class SummaryDutyEntry
+    internal sealed class SummaryDutyEntry : IEquatable<SummaryDutyEntry>
     {
         public string Name { get; set; }
         public DutyType Type { get; set; }
@@ -38,7 +38,16 @@ namespace MentorRouletteCounter
             {
                 averageTime = new TimeSpan(Convert.ToInt64(AverageTime.Average(t => t.Ticks)));
             }
-            return $"{Type},{Name},{Count},{averageTime}";
+            return $"{Type},{Name.Replace(",", ";")},{Count},{averageTime}";
+        }
+
+        public bool Equals(SummaryDutyEntry? other)
+        {
+            if (other == null) return false;
+
+            if (ReferenceEquals(this, other)) return true;
+
+            return Name == other.Name && Type == other.Type;
         }
     }
 }

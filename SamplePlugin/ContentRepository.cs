@@ -13,6 +13,9 @@ namespace MentorRouletteCounter
         public static List<string> ExtremeTrials { get; private set; }
         public static List<string> AllianceRaids { get; private set; }
         public static List<string> Guildhests { get; private set; }
+        public static List<string> PVP { get; private set; }
+        public static List<string> DoL { get; private set; }
+        public static List<string> DeepDungeons { get; private set; }
 
         public static void Initialize()
         {
@@ -26,6 +29,9 @@ namespace MentorRouletteCounter
                 && (d.Name.RawString.Contains("(Extreme)") || d.Name.RawString.Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase))).Select(d => d.Name.RawString).ToList();
             AllianceRaids = all.Where(d => d.ContentType.Value.Name == "Raids" && d.ContentMemberType.Value.TanksPerParty == 1).Select(d => d.Name.RawString).ToList();
             Guildhests = all.Where(d => d.ContentType.Value.Name == "Guildhests").Select(d => d.Name.RawString).ToList();
+            PVP = all.Where(d => d.ContentType.Value.Name == "PvP").Select(d => d.Name.RawString).ToList();
+            DoL = all.Where(d => d.ContentType.Value.Name == "Desciple of the Land").Select(d => d.Name.RawString).ToList();
+            DeepDungeons = all.Where(d => d.ContentType.Value.Name == "Deep Dungeons").Select(d => d.Name.RawString).ToList();
         }
 
         public static IList<SummaryDutyEntry> GetBlankDutyEntyList()
@@ -37,8 +43,10 @@ namespace MentorRouletteCounter
             ExtremeTrials.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
             AllianceRaids.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
             Guildhests.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
-
-            return list;
+            PVP.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
+            DoL.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
+            DeepDungeons.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
+            return list.DistinctBy(d => new {d.Name, d.Type}).Where(d => !string.IsNullOrEmpty(d.Name)).ToList();
         }
 
         public static DutyType GetContentTypeForDuty(string dutyName)
@@ -60,6 +68,15 @@ namespace MentorRouletteCounter
 
             if (AllianceRaids.Any(d => d.Contains(dutyName, StringComparison.OrdinalIgnoreCase)))
                 return DutyType.Alliance;
+            
+            if (PVP.Any(d => d.Contains(dutyName, StringComparison.OrdinalIgnoreCase)))
+                return DutyType.PVP;
+            
+            if (DoL.Any(d => d.Contains(dutyName, StringComparison.OrdinalIgnoreCase)))
+                return DutyType.DoL;
+            
+            if (DeepDungeons.Any(d => d.Contains(dutyName, StringComparison.OrdinalIgnoreCase)))
+                return DutyType.DeepDungeon;
 
             throw new NotSupportedException();
         }

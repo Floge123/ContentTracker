@@ -7,6 +7,10 @@ namespace MentorRouletteCounter
         ExtremeTrial,
         NormalTrial,
         Guildhest,
-        Alliance
+        Alliance,
+        PVP,
+        GoldSaucer,
+        DoL,
+        DeepDungeon
     }
 }
