@@ -33,7 +33,7 @@ namespace MentorRouletteCounter
                 Service.Duty.DutyCompleted += Duty_DutyCompleted;
                 Service.Client.TerritoryChanged += Client_TerritoryChanged;
 
-                _gilTracker = new GilTracker(TimeSpan.FromSeconds(10));
+                _gilTracker = new GilTracker(TimeSpan.FromMinutes(1));
                 _gilTracker.Start();
             }
             catch (Exception ex)
