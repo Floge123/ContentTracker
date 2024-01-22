@@ -6,11 +6,13 @@ namespace MentorRouletteCounter
     {
         public DateTime Time { get; set; }
         public long Gil { get; set; }
+        public string CharacterName { get; set; }
 
-        public GilEntry(DateTime time, long gil)
+        public GilEntry(DateTime time, string characterName, long gil)
         {
             Time = time;
             Gil = gil;
+            CharacterName = characterName;
         }
 
         public static GilEntry FromCsv(string[] csv)
@@ -20,12 +22,12 @@ namespace MentorRouletteCounter
             {
                 timestamp = dt;
             }
-            return new GilEntry(timestamp, long.Parse(csv[1]));
+            return new GilEntry(timestamp, csv[1], long.Parse(csv[2]));
         }
 
         public string AsCsv()
         {
-            return $"{Time},{Gil}";
+            return $"{Time},{CharacterName},{Gil}";
         }
     }
 }

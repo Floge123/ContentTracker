@@ -38,7 +38,7 @@ namespace MentorRouletteCounter
             try
             {
                 long currentGil = GetRetainerGil() + GetCharGil();
-                _entries.Add(new GilEntry(RoundDownToMinute(DateTime.Now), currentGil));
+                _entries.Add(new GilEntry(RoundDownToMinute(DateTime.Now), Service.Client.LocalPlayer.Name.TextValue, currentGil));
                 FillMissingEntries();
                 ExportGil();
             }
@@ -99,11 +99,15 @@ namespace MentorRouletteCounter
 
         private void FillMissingEntries()
         {
-            var lowestTime = _entries.FirstOrDefault()?.Time;
+            if (Service.Client.LocalPlayer?.Name == null)
+                return;
+            var currentCharacterEntires = _entries.Where(e => e.CharacterName == Service.Client.LocalPlayer.Name.TextValue).ToArray();
+
+            var lowestTime = currentCharacterEntires.FirstOrDefault()?.Time;
             if (lowestTime == null)
                 return;
 
-            var latestTime = _entries.LastOrDefault()?.Time;
+            var latestTime = currentCharacterEntires.LastOrDefault()?.Time;
             if (latestTime == null)
                 return;
 
@@ -111,7 +115,7 @@ namespace MentorRouletteCounter
             GilEntry current;
             for (DateTime? date = lowestTime; date != latestTime; date = date.Value.AddMinutes(1))
             {
-                current = _entries[i];
+                current = currentCharacterEntires[i];
                 if (RoundDownToMinute(current.Time) == RoundDownToMinute(date.Value))
                 {
                     //Already tracked
@@ -119,9 +123,9 @@ namespace MentorRouletteCounter
                     continue;
                 }
 
-                _entries.Add(new GilEntry(RoundDownToMinute(date.Value), current.Gil));
+                _entries.Add(new GilEntry(RoundDownToMinute(date.Value), Service.Client.LocalPlayer.Name.TextValue, current.Gil));
             }
-            _entries = _entries.OrderBy(x => x.Time).ToList();
+            _entries = currentCharacterEntires.Concat(_entries).DistinctBy(x => new {x.Time, x.CharacterName}).OrderBy(x => x.Time).ToList();
         }
 
         private DateTime RoundDownToMinute(DateTime dateTime)
