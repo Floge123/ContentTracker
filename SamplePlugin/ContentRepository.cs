@@ -30,7 +30,7 @@ namespace MentorRouletteCounter
             AllianceRaids = all.Where(d => d.ContentType.Value.Name == "Raids" && d.ContentMemberType.Value.TanksPerParty == 1).Select(d => d.Name.RawString).ToList();
             Guildhests = all.Where(d => d.ContentType.Value.Name == "Guildhests").Select(d => d.Name.RawString).ToList();
             PVP = all.Where(d => d.ContentType.Value.Name == "PvP").Select(d => d.Name.RawString).ToList();
-            DoL = all.Where(d => d.ContentType.Value.Name == "Desciple of the Land").Select(d => d.Name.RawString).ToList();
+            DoL = all.Where(d => d.ContentType.Value.Name == "Disciples of the Land").Select(d => d.Name.RawString).ToList();
             DeepDungeons = all.Where(d => d.ContentType.Value.Name == "Deep Dungeons").Select(d => d.Name.RawString).ToList();
         }
 
