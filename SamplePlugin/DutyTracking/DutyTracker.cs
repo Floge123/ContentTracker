@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace MentorRouletteCounter
+namespace MentorRouletteCounter.DutyTracking
 {
     internal sealed class DutyTracker
     {
@@ -89,10 +89,10 @@ namespace MentorRouletteCounter
         private void ReadDuties(string path, IList<SummaryDutyEntry> duties)
         {
             PathHelper.EnsurePathExists(path);
-            using TextFieldParser parser = new TextFieldParser(path);
+            using var parser = new TextFieldParser(path);
             parser.TextFieldType = FieldType.Delimited;
             parser.SetDelimiters(",");
-            while (!parser.EndOfData) 
+            while (!parser.EndOfData)
             {
                 var fields = parser.ReadFields();
                 var readDuty = SummaryDutyEntry.FromCsv(fields);
@@ -105,7 +105,7 @@ namespace MentorRouletteCounter
         private void ReadFlatDuties(string path, IList<DutyEntry> duties)
         {
             PathHelper.EnsurePathExists(path);
-            using TextFieldParser parser = new TextFieldParser(path);
+            using var parser = new TextFieldParser(path);
             parser.TextFieldType = FieldType.Delimited;
             parser.SetDelimiters(",");
             while (!parser.EndOfData)
@@ -121,7 +121,7 @@ namespace MentorRouletteCounter
             PathHelper.EnsurePathExists(path);
             Logger.Log($"Exporting to {path}");
 
-            using StreamWriter writer = new StreamWriter(path);
+            using var writer = new StreamWriter(path);
             foreach (var item in duties)
             {
                 writer.WriteLine(item.AsCsv());
@@ -133,7 +133,7 @@ namespace MentorRouletteCounter
             PathHelper.EnsurePathExists(path);
             Logger.Log($"Exporting to {path}");
 
-            using StreamWriter writer = new StreamWriter(path);
+            using var writer = new StreamWriter(path);
             foreach (var item in duties)
             {
                 writer.WriteLine(item.AsCsv());

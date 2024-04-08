@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace MentorRouletteCounter
+namespace MentorRouletteCounter.GilTracking
 {
     internal class GilTracker
     {
@@ -37,7 +37,7 @@ namespace MentorRouletteCounter
         {
             try
             {
-                long currentGil = GetRetainerGil() + GetCharGil();
+                var currentGil = GetRetainerGil() + GetCharGil();
                 _entries.Add(new GilEntry(RoundDownToMinute(DateTime.Now), Service.Client.LocalPlayer.Name.TextValue, currentGil));
                 FillMissingEntries();
                 ExportGil();
@@ -52,18 +52,18 @@ namespace MentorRouletteCounter
         {
             PathHelper.EnsurePathExists(ExportPath);
 
-            using StreamWriter writer = new StreamWriter(ExportPath);
+            using var writer = new StreamWriter(ExportPath);
             foreach (var entry in _entries)
             {
-                writer.WriteLine(entry.AsCsv());               
+                writer.WriteLine(entry.AsCsv());
             }
         }
 
         private unsafe long GetRetainerGil()
         {
-            RetainerManager manager = *RetainerManager.Instance();
+            var manager = *RetainerManager.Instance();
             var retainerCount = manager.GetRetainerCount();
-            if (retainerCount < 2) 
+            if (retainerCount < 2)
             {
                 throw new ArgumentException("Retainers not initialized.");
             }
@@ -86,9 +86,9 @@ namespace MentorRouletteCounter
         {
             _entries = new List<GilEntry>();
             PathHelper.EnsurePathExists(ExportPath);
-            using TextFieldParser parser = new TextFieldParser(ExportPath);
+            using var parser = new TextFieldParser(ExportPath);
             parser.TextFieldType = FieldType.Delimited;
-            parser.SetDelimiters(",");           
+            parser.SetDelimiters(",");
             while (!parser.EndOfData)
             {
                 var fields = parser.ReadFields();
@@ -111,7 +111,7 @@ namespace MentorRouletteCounter
             if (latestTime == null)
                 return;
 
-            int i = 0;
+            var i = 0;
             GilEntry current;
             for (DateTime? date = lowestTime; date != latestTime; date = date.Value.AddMinutes(1))
             {
@@ -125,7 +125,7 @@ namespace MentorRouletteCounter
 
                 _entries.Add(new GilEntry(RoundDownToMinute(date.Value), Service.Client.LocalPlayer.Name.TextValue, current.Gil));
             }
-            _entries = currentCharacterEntires.Concat(_entries).DistinctBy(x => new {x.Time, x.CharacterName}).OrderBy(x => x.Time).ToList();
+            _entries = currentCharacterEntires.Concat(_entries).DistinctBy(x => new { x.Time, x.CharacterName }).OrderBy(x => x.Time).ToList();
         }
 
         private DateTime RoundDownToMinute(DateTime dateTime)

@@ -1,6 +1,9 @@
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
+using MentorRouletteCounter.DutyTracking;
+using MentorRouletteCounter.GilTracking;
+using MentorRouletteCounter.PeopleTracking;
 using System;
 
 namespace MentorRouletteCounter
@@ -9,6 +12,7 @@ namespace MentorRouletteCounter
     {
         private readonly DutyTracker _dutyTracker;
         private readonly GilTracker _gilTracker;
+        private readonly PeopleTracker _peopleTracker;
         private bool _enteringContent;
 
         public string Name => "Mentor Roulette Tracker";
@@ -35,6 +39,8 @@ namespace MentorRouletteCounter
 
                 _gilTracker = new GilTracker(TimeSpan.FromMinutes(1));
                 _gilTracker.Start();
+
+                _peopleTracker = new PeopleTracker();
             }
             catch (Exception ex)
             {
@@ -68,6 +74,8 @@ namespace MentorRouletteCounter
                 var territory = Service.GameData.Excel.GetSheet<TerritoryType>()?.GetRow(e);
                 _dutyTracker.End(territory.ContentFinderCondition.Value);
                 _dutyTracker.ExportAsCsv();
+
+                _peopleTracker.Track();
             }
             catch (Exception ex)
             {

@@ -1,6 +1,6 @@
 using System;
 
-namespace MentorRouletteCounter
+namespace MentorRouletteCounter.DutyTracking
 {
     internal class DutyEntry : IEquatable<DutyEntry>
     {
@@ -22,12 +22,12 @@ namespace MentorRouletteCounter
         public static DutyEntry FromCsv(string[] csv)
         {
             var timestamp = DateTime.Now;
-            if (DateTime.TryParse(csv[0], out DateTime dt))
+            if (DateTime.TryParse(csv[0], out var dt))
             {
                 timestamp = dt;
             }
             var time = TimeSpan.Zero;
-            if (TimeSpan.TryParse(csv[3], out TimeSpan t))
+            if (TimeSpan.TryParse(csv[3], out var t))
             {
                 time = t;
             }
@@ -41,7 +41,7 @@ namespace MentorRouletteCounter
 
         public bool Equals(DutyEntry? other)
         {
-            if (other  == null) return false;
+            if (other == null) return false;
 
             if (ReferenceEquals(this, other)) return true;
 

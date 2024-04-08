@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MentorRouletteCounter
+namespace MentorRouletteCounter.DutyTracking
 {
     internal sealed class SummaryDutyEntry : IEquatable<SummaryDutyEntry>
     {
@@ -24,7 +24,7 @@ namespace MentorRouletteCounter
             var duty = new SummaryDutyEntry(Enum.Parse<DutyType>(csv[0]), csv[1]);
             duty.Count = int.Parse(csv[2]);
             duty.AverageTime = new List<TimeSpan>();
-            if (TimeSpan.TryParse(csv[3], out TimeSpan time))
+            if (TimeSpan.TryParse(csv[3], out var time))
             {
                 duty.AverageTime.Add(time);
             }

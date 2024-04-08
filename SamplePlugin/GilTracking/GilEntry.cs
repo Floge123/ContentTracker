@@ -1,6 +1,6 @@
 using System;
 
-namespace MentorRouletteCounter
+namespace MentorRouletteCounter.GilTracking
 {
     internal sealed class GilEntry
     {
@@ -18,7 +18,7 @@ namespace MentorRouletteCounter
         public static GilEntry FromCsv(string[] csv)
         {
             var timestamp = DateTime.Now;
-            if (DateTime.TryParse(csv[0], out DateTime dt))
+            if (DateTime.TryParse(csv[0], out var dt))
             {
                 timestamp = dt;
             }
