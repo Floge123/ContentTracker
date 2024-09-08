@@ -9,6 +9,7 @@ namespace MentorRouletteCounter.DutyTracking
     {
         public static List<string> Dungeons { get; private set; }
         public static List<string> NormalRaids { get; private set; }
+        public static List<string> SavageRaids { get; private set; }
         public static List<string> NormalTrials { get; private set; }
         public static List<string> ExtremeTrials { get; private set; }
         public static List<string> AllianceRaids { get; private set; }
@@ -22,7 +23,9 @@ namespace MentorRouletteCounter.DutyTracking
             var all = Service.GameData.GetExcelSheet<ContentFinderCondition>().Where(d => d.ContentType?.Value != null).ToList();
 
             Dungeons = all.Where(d => d.ContentType.Value.Name == "Dungeons").Select(d => d.Name.RawString).ToList();
-            NormalRaids = all.Where(d => d.ContentType.Value.Name == "Raids" && d.ContentMemberType.Value.TanksPerParty > 1).Select(d => d.Name.RawString).ToList();
+            var raids = all.Where(d => d.ContentType.Value.Name == "Raids" && d.ContentMemberType.Value.TanksPerParty > 1).ToList();
+            NormalRaids = raids.Where(d => !d.Name.RawString.Contains("(Savage)")).Select(d => d.Name.RawString).ToList();
+            SavageRaids = raids.Where(d => d.Name.RawString.Contains("(Savage)")).Select(d => d.Name.RawString).ToList();
             NormalTrials = all.Where(d => d.ContentType.Value.Name == "Trials"
                 && !d.Name.RawString.Contains("(Extreme)")
                 && !d.Name.RawString.Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase)).Select(d => d.Name.RawString).ToList();
@@ -40,6 +43,7 @@ namespace MentorRouletteCounter.DutyTracking
             var list = new List<DutyEntry>();
             Dungeons.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
             NormalRaids.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            SavageRaids.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
             NormalTrials.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
             ExtremeTrials.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
             AllianceRaids.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
@@ -60,6 +64,9 @@ namespace MentorRouletteCounter.DutyTracking
 
             if (NormalRaids.Any(d => d.Contains(dutyName, StringComparison.OrdinalIgnoreCase)))
                 return DutyType.NormalRaid;
+
+            if (SavageRaids.Any(d => d.Contains(dutyName, StringComparison.OrdinalIgnoreCase)))
+                return DutyType.SavageRaid;
 
             if (NormalTrials.Any(d => d.Contains(dutyName, StringComparison.OrdinalIgnoreCase)))
                 return DutyType.NormalTrial;

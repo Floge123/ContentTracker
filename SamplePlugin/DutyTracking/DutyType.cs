@@ -4,6 +4,7 @@ namespace MentorRouletteCounter.DutyTracking
     {
         Dungeon,
         NormalRaid,
+        SavageRaid,
         ExtremeTrial,
         NormalTrial,
         Guildhest,
