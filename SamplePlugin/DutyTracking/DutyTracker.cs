@@ -9,13 +9,9 @@ namespace MentorRouletteCounter.DutyTracking
 {
     internal sealed class DutyTracker
     {
-        private static readonly string ExportPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\Export.txt";
         private static readonly string ExportFlatPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\Export_all.txt";
-        private static readonly string ExportMentorRoulettePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\Export_Mentor.txt";
         private static readonly string ExportFlatMentorRoulettePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\Export_Mentor_all.txt";
 
-        private IList<SummaryDutyEntry> _doneDuties;
-        private IList<SummaryDutyEntry> _doneMentorDuties;
         private IList<DutyEntry> _flatDoneDuties;
         private IList<DutyEntry> _flatDoneMentorDuties;
         private DateTime _currentStartTime;
@@ -23,8 +19,6 @@ namespace MentorRouletteCounter.DutyTracking
 
         public DutyTracker()
         {
-            _doneDuties = ContentRepository.GetBlankDutyEntyList();
-            _doneMentorDuties = ContentRepository.GetBlankDutyEntyList();
             _flatDoneDuties = new List<DutyEntry>();
             _flatDoneMentorDuties = new List<DutyEntry>();
             ReadExportedStates();
@@ -52,54 +46,30 @@ namespace MentorRouletteCounter.DutyTracking
 
         private void StoreDoneMentorDuty(ContentFinderCondition content, TimeSpan elapsedTime)
         {
-            var duty = _doneMentorDuties.First(d => d.Name.Equals(content.Name, StringComparison.OrdinalIgnoreCase));
-            duty.Count++;
-            duty.AverageTime.Add(elapsedTime);
+            var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.Name.Equals(content.Name, StringComparison.OrdinalIgnoreCase));
             string jobName = Service.Client.LocalPlayer.ClassJob.GameData.Name;
-            Logger.Log($"Finished duty '{duty.Name}' in mentor roulette for the '{duty.Count}' time in '{elapsedTime}' as '{jobName}'");
+            Logger.Log($"Finished duty '{duty.Name}' in mentor roulette in '{elapsedTime}' as '{jobName}'");
             _flatDoneMentorDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName));
         }
 
         private void StoreDoneDuty(ContentFinderCondition content, TimeSpan elapsedTime)
         {
-            var duty = _doneDuties.First(d => d.Name.Equals(content.Name, StringComparison.OrdinalIgnoreCase));
-            duty.Count++;
-            duty.AverageTime.Add(elapsedTime);
+            var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.Name.Equals(content.Name, StringComparison.OrdinalIgnoreCase));
             string jobName = Service.Client.LocalPlayer.ClassJob.GameData.Name;
-            Logger.Log($"Finished duty '{duty.Name}' for the '{duty.Count}' time in '{elapsedTime}' as '{jobName}'");
+            Logger.Log($"Finished duty '{duty.Name}' in '{elapsedTime}' as '{jobName}'");
             _flatDoneDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName));
         }
 
         public void ExportAsCsv()
         {
-            Export(ExportPath, _doneDuties);
             Export(ExportFlatPath, _flatDoneDuties);
-            Export(ExportMentorRoulettePath, _doneMentorDuties);
             Export(ExportFlatMentorRoulettePath, _flatDoneMentorDuties);
         }
 
         private void ReadExportedStates()
         {
-            ReadDuties(ExportPath, _doneDuties);
             ReadFlatDuties(ExportFlatPath, _flatDoneDuties);
-            ReadDuties(ExportMentorRoulettePath, _doneMentorDuties);
             ReadFlatDuties(ExportFlatMentorRoulettePath, _flatDoneMentorDuties);
-        }
-
-        private void ReadDuties(string path, IList<SummaryDutyEntry> duties)
-        {
-            PathHelper.EnsurePathExists(path);
-            using var parser = new TextFieldParser(path);
-            parser.TextFieldType = FieldType.Delimited;
-            parser.SetDelimiters(",");
-            while (!parser.EndOfData)
-            {
-                var fields = parser.ReadFields();
-                var readDuty = SummaryDutyEntry.FromCsv(fields);
-                var duty = duties.First(d => d.Name.Equals(readDuty.Name));
-                duty.Count = readDuty.Count;
-                duty.AverageTime = readDuty.AverageTime;
-            }
         }
 
         private void ReadFlatDuties(string path, IList<DutyEntry> duties)
@@ -113,18 +83,6 @@ namespace MentorRouletteCounter.DutyTracking
                 var fields = parser.ReadFields();
                 var readDuty = DutyEntry.FromCsv(fields);
                 duties.Add(readDuty);
-            }
-        }
-
-        private void Export(string path, IList<SummaryDutyEntry> duties)
-        {
-            PathHelper.EnsurePathExists(path);
-            Logger.Log($"Exporting to {path}");
-
-            using var writer = new StreamWriter(path);
-            foreach (var item in duties)
-            {
-                writer.WriteLine(item.AsCsv());
             }
         }
 

@@ -1,4 +1,5 @@
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
+using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,34 +13,18 @@ namespace MentorRouletteCounter.PeopleTracking
     {
         private static readonly string ExportPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\PersonTrack.txt";
 
-        public unsafe void Track()
+        public unsafe void Track(ContentFinderCondition content)
         {
-            Span<PartyMember> members = new(GroupManager.Instance()->PartyMembers, GroupManager.Instance()->MemberCount);
-            using var writer = new StreamWriter(ExportPath);
+            Span<PartyMember> members = GroupManager.Instance()->MainGroup.PartyMembers;
+            using var writer = new StreamWriter(ExportPath, true);
             PathHelper.EnsurePathExists(ExportPath);
             foreach (var member in members)
             {
-                var name = ReadString(member.Name);
-                if (name == Service.Client.LocalPlayer.Name.TextValue)
+                var name = member.NameString;
+                if (name == Service.Client.LocalPlayer.Name.TextValue || string.IsNullOrEmpty(name))
                     continue;
-                writer.WriteLine(name);
+                writer.WriteLine(new PeopleEntry(name, content.Name, DateTime.Now).AsCsv());
             }
-        }
-
-        public static unsafe string ReadString(byte* ptr)
-        {
-            int length = 0;
-            byte* currentPtr = ptr;
-
-            // Iterate until the string terminating character is encountered
-            while (*currentPtr != 0)
-            {
-                length++;
-                currentPtr++;
-            }
-
-            // Convert the byte array to a string using UTF-8 encoding
-            return Encoding.UTF8.GetString(ptr, length);
         }
     }
 }

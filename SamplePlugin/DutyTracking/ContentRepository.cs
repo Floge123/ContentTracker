@@ -20,6 +20,7 @@ namespace MentorRouletteCounter.DutyTracking
         public static void Initialize()
         {
             var all = Service.GameData.GetExcelSheet<ContentFinderCondition>().Where(d => d.ContentType?.Value != null).ToList();
+
             Dungeons = all.Where(d => d.ContentType.Value.Name == "Dungeons").Select(d => d.Name.RawString).ToList();
             NormalRaids = all.Where(d => d.ContentType.Value.Name == "Raids" && d.ContentMemberType.Value.TanksPerParty > 1).Select(d => d.Name.RawString).ToList();
             NormalTrials = all.Where(d => d.ContentType.Value.Name == "Trials"
@@ -34,18 +35,18 @@ namespace MentorRouletteCounter.DutyTracking
             DeepDungeons = all.Where(d => d.ContentType.Value.Name == "Deep Dungeons").Select(d => d.Name.RawString).ToList();
         }
 
-        public static IList<SummaryDutyEntry> GetBlankDutyEntyList()
+        public static IList<DutyEntry> GetBlankDutyEntyList()
         {
-            var list = new List<SummaryDutyEntry>();
-            Dungeons.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
-            NormalRaids.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
-            NormalTrials.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
-            ExtremeTrials.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
-            AllianceRaids.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
-            Guildhests.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
-            PVP.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
-            DoL.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
-            DeepDungeons.ForEach(d => list.Add(new SummaryDutyEntry(GetContentTypeForDuty(d), d)));
+            var list = new List<DutyEntry>();
+            Dungeons.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            NormalRaids.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            NormalTrials.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            ExtremeTrials.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            AllianceRaids.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            Guildhests.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            PVP.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            DoL.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
+            DeepDungeons.ForEach(d => list.Add(new DutyEntry(GetContentTypeForDuty(d), d)));
             return list.DistinctBy(d => new { d.Name, d.Type }).Where(d => !string.IsNullOrEmpty(d.Name)).ToList();
         }
 

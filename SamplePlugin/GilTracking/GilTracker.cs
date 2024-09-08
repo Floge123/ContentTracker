@@ -13,13 +13,12 @@ namespace MentorRouletteCounter.GilTracking
         private static readonly string ExportPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\GilTrack.txt";
         private Timer _timer;
         private TimeSpan _interval;
-        private IList<GilEntry> _entries;
+        private IList<GilEntry> _entries = new List<GilEntry>();
 
         public GilTracker(TimeSpan interval)
         {
             _interval = interval;
-            ReadEntries();
-            FillMissingEntries();
+            ExportEntries();
         }
 
         public void Start()
@@ -39,8 +38,7 @@ namespace MentorRouletteCounter.GilTracking
             {
                 var currentGil = GetRetainerGil() + GetCharGil();
                 _entries.Add(new GilEntry(RoundDownToMinute(DateTime.Now), Service.Client.LocalPlayer.Name.TextValue, currentGil));
-                FillMissingEntries();
-                ExportGil();
+                ExportEntries();
             }
             catch (Exception ex)
             {
@@ -84,7 +82,6 @@ namespace MentorRouletteCounter.GilTracking
 
         private void ReadEntries()
         {
-            _entries = new List<GilEntry>();
             PathHelper.EnsurePathExists(ExportPath);
             using var parser = new TextFieldParser(ExportPath);
             parser.TextFieldType = FieldType.Delimited;
@@ -97,10 +94,13 @@ namespace MentorRouletteCounter.GilTracking
             }
         }
 
-        private void FillMissingEntries()
+        private void ExportEntries()
         {
             if (Service.Client.LocalPlayer?.Name == null)
                 return;
+
+            ReadEntries();
+
             var currentCharacterEntires = _entries.Where(e => e.CharacterName == Service.Client.LocalPlayer.Name.TextValue).ToArray();
 
             var lowestTime = currentCharacterEntires.FirstOrDefault()?.Time;
@@ -113,19 +113,23 @@ namespace MentorRouletteCounter.GilTracking
 
             var i = 0;
             GilEntry current;
-            for (DateTime? date = lowestTime; date != latestTime; date = date.Value.AddMinutes(1))
+            for (DateTime? date = lowestTime; date < latestTime; date = date.Value.AddMinutes(5))
             {
                 current = currentCharacterEntires[i];
-                if (RoundDownToMinute(current.Time) == RoundDownToMinute(date.Value))
+                if (RoundDownToMinute(current.Time) <= RoundDownToMinute(date.Value))
                 {
                     //Already tracked
-                    i++;
+                    i++;                   
                     continue;
                 }
 
                 _entries.Add(new GilEntry(RoundDownToMinute(date.Value), Service.Client.LocalPlayer.Name.TextValue, current.Gil));
             }
             _entries = currentCharacterEntires.Concat(_entries).DistinctBy(x => new { x.Time, x.CharacterName }).OrderBy(x => x.Time).ToList();
+
+            ExportGil();
+
+            _entries.Clear();
         }
 
         private DateTime RoundDownToMinute(DateTime dateTime)

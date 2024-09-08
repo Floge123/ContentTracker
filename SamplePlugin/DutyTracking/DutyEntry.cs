@@ -10,6 +10,12 @@ namespace MentorRouletteCounter.DutyTracking
         public TimeSpan ElapsedTime { get; set; }
         public string JobName { get; set; }
 
+        public DutyEntry(DutyType type, string name)
+        {
+            Name = name;
+            Type = type;
+        }
+
         public DutyEntry(DateTime timeStamp, DutyType type, string name, TimeSpan time, string jobName)
         {
             TimeStamp = timeStamp;

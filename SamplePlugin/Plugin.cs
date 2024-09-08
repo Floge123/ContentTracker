@@ -13,14 +13,13 @@ namespace MentorRouletteCounter
         private readonly DutyTracker _dutyTracker;
         private readonly GilTracker _gilTracker;
         private readonly PeopleTracker _peopleTracker;
-        private bool _enteringContent;
 
         public string Name => "Mentor Roulette Tracker";
 
-        private DalamudPluginInterface PluginInterface { get; init; }
+        private IDalamudPluginInterface PluginInterface { get; init; }
         public Configuration Configuration { get; init; }
 
-        public Plugin([RequiredVersion("1.0")] DalamudPluginInterface pluginInterface)
+        public Plugin(IDalamudPluginInterface pluginInterface)
         {
             PluginInterface = pluginInterface;
             Service.Initialize(pluginInterface);
@@ -33,11 +32,9 @@ namespace MentorRouletteCounter
             {
                 _dutyTracker = new DutyTracker();               
                 Service.Duty.DutyStarted += Duty_DutyStarted;
-                Service.Client.CfPop += Client_CfPop;
                 Service.Duty.DutyCompleted += Duty_DutyCompleted;
-                Service.Client.TerritoryChanged += Client_TerritoryChanged;
 
-                _gilTracker = new GilTracker(TimeSpan.FromMinutes(1));
+                _gilTracker = new GilTracker(TimeSpan.FromMinutes(5));
                 _gilTracker.Start();
 
                 _peopleTracker = new PeopleTracker();
@@ -48,19 +45,6 @@ namespace MentorRouletteCounter
             }
         }
 
-        private void Client_TerritoryChanged(ushort obj)
-        {
-            if (_enteringContent)
-            {
-                _enteringContent = false;
-                _dutyTracker.Start();
-            }
-        }
-
-        private void Client_CfPop(ContentFinderCondition obj)
-        {
-            _enteringContent = true;
-        }
 
         private void Duty_DutyStarted(object? sender, ushort e)
         {
@@ -72,10 +56,14 @@ namespace MentorRouletteCounter
             try
             {
                 var territory = Service.GameData.Excel.GetSheet<TerritoryType>()?.GetRow(e);
-                _dutyTracker.End(territory.ContentFinderCondition.Value);
+                var content = territory?.ContentFinderCondition.Value;
+                if (content is null)
+                    return;
+
+                _dutyTracker.End(content);
                 _dutyTracker.ExportAsCsv();
 
-                _peopleTracker.Track();
+                _peopleTracker.Track(content);
             }
             catch (Exception ex)
             {
@@ -87,8 +75,6 @@ namespace MentorRouletteCounter
         {
             Service.Duty.DutyStarted -= Duty_DutyStarted;
             Service.Duty.DutyCompleted -= Duty_DutyCompleted;
-            Service.Client.CfPop -= Client_CfPop;
-            Service.Client.TerritoryChanged -= Client_TerritoryChanged;
             _gilTracker.Stop();
         }
     }
