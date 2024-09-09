@@ -46,6 +46,7 @@ namespace MentorRouletteCounter.DutyTracking
 
         private void StoreDoneMentorDuty(ContentFinderCondition content, TimeSpan elapsedTime)
         {
+            Logger.Log($"Done duty {content.Name}");
             var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.Name.Equals(content.Name, StringComparison.OrdinalIgnoreCase));
             string jobName = Service.Client.LocalPlayer.ClassJob.GameData.Name;
             Logger.Log($"Finished duty '{duty.Name}' in mentor roulette in '{elapsedTime}' as '{jobName}'");

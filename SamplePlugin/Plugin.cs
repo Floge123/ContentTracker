@@ -28,6 +28,11 @@ namespace MentorRouletteCounter
             Configuration.Initialize(PluginInterface);
             ContentRepository.Initialize();
 
+            foreach (var item in ContentRepository.GetBlankDutyEntyList())
+            {
+                Logger.Log($"{item.Type} -> {item.Name}");
+            };
+
             try
             {
                 _dutyTracker = new DutyTracker();               
