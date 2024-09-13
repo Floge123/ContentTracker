@@ -5,15 +5,17 @@ namespace MentorRouletteCounter.DutyTracking
     internal class DutyEntry : IEquatable<DutyEntry>
     {
         public DateTime TimeStamp { get; set; }
+        public uint RowId { get; set; }
         public string Name { get; set; }
         public DutyType Type { get; set; }
         public TimeSpan ElapsedTime { get; set; }
         public string JobName { get; set; }
 
-        public DutyEntry(DutyType type, string name)
+        public DutyEntry(DutyType type, string name, uint id)
         {
             Name = name;
             Type = type;
+            RowId = id;
         }
 
         public DutyEntry(DateTime timeStamp, DutyType type, string name, TimeSpan time, string jobName)

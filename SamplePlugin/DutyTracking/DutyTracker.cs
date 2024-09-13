@@ -32,7 +32,7 @@ namespace MentorRouletteCounter.DutyTracking
 
         public void End(ContentFinderCondition content)
         {
-            Logger.Log("Done Duty " + content.Name);
+            Logger.Log($"Done Duty {content.Name} ({content.RowId})");
             _currentEndTime = DateTime.Now;
             var elapsedTime = _currentEndTime - _currentStartTime;
             StoreDoneDuty(content, elapsedTime);
@@ -46,8 +46,7 @@ namespace MentorRouletteCounter.DutyTracking
 
         private void StoreDoneMentorDuty(ContentFinderCondition content, TimeSpan elapsedTime)
         {
-            Logger.Log($"Done duty {content.Name}");
-            var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.Name.Equals(content.Name, StringComparison.OrdinalIgnoreCase));
+            var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.RowId == content.RowId);
             string jobName = Service.Client.LocalPlayer.ClassJob.GameData.Name;
             Logger.Log($"Finished duty '{duty.Name}' in mentor roulette in '{elapsedTime}' as '{jobName}'");
             _flatDoneMentorDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName));
@@ -55,7 +54,7 @@ namespace MentorRouletteCounter.DutyTracking
 
         private void StoreDoneDuty(ContentFinderCondition content, TimeSpan elapsedTime)
         {
-            var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.Name.Equals(content.Name, StringComparison.OrdinalIgnoreCase));
+            var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.RowId == content.RowId);
             string jobName = Service.Client.LocalPlayer.ClassJob.GameData.Name;
             Logger.Log($"Finished duty '{duty.Name}' in '{elapsedTime}' as '{jobName}'");
             _flatDoneDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName));
