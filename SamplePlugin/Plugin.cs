@@ -1,6 +1,6 @@
 using Dalamud.IoC;
 using Dalamud.Plugin;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using MentorRouletteCounter.DutyTracking;
 using MentorRouletteCounter.GilTracking;
 using MentorRouletteCounter.PeopleTracking;
@@ -60,10 +60,10 @@ namespace MentorRouletteCounter
                 if (content is null)
                     return;
 
-                _dutyTracker.End(content);
+                _dutyTracker.End(content.Value);
                 _dutyTracker.ExportAsCsv();
 
-                _peopleTracker.Track(content);
+                _peopleTracker.Track(content.Value);
             }
             catch (Exception ex)
             {

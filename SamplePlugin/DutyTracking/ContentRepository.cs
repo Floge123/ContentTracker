@@ -1,4 +1,4 @@
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,22 +20,22 @@ namespace MentorRouletteCounter.DutyTracking
 
         public static void Initialize()
         {
-            var all = Service.GameData.GetExcelSheet<ContentFinderCondition>().Where(d => d.ContentType?.Value != null).ToList();
+            var all = Service.GameData.GetExcelSheet<ContentFinderCondition>().ToList();
 
-            Dungeons = all.Where(d => d.ContentType.Value.RowId == 2).ToDictionary(d => d.RowId, d => d.Name.RawString);
+            Dungeons = all.Where(d => d.ContentType.Value.RowId == 2).ToDictionary(d => d.RowId, d => d.Name.ToString());
             var raids = all.Where(d => d.ContentType.Value.RowId == 5 && d.ContentMemberType.Value.TanksPerParty > 1).ToList();
-            NormalRaids = raids.Where(d => !d.Name.RawString.Contains("(Savage)") && !d.Name.RawString.Contains("(episch)")).ToDictionary(d => d.RowId, d => d.Name.RawString);
-            SavageRaids = raids.Where(d => d.Name.RawString.Contains("(Savage)") || d.Name.RawString.Contains("(episch)")).ToDictionary(d => d.RowId, d => d.Name.RawString);
+            NormalRaids = raids.Where(d => !d.Name.ToString().Contains("(Savage)") && !d.Name.ToString().Contains("(episch)")).ToDictionary(d => d.RowId, d => d.Name.ToString());
+            SavageRaids = raids.Where(d => d.Name.ToString().Contains("(Savage)") || d.Name.ToString().Contains("(episch)")).ToDictionary(d => d.RowId, d => d.Name.ToString());
             NormalTrials = all.Where(d => d.ContentType.Value.RowId == 4
-                && !d.Name.RawString.Contains("(Extreme)")
-                && !d.Name.RawString.Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase)).ToDictionary(d => d.RowId, d => d.Name.RawString);
+                && !d.Name.ToString().Contains("(Extreme)")
+                && !d.Name.ToString().Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase)).ToDictionary(d => d.RowId, d => d.Name.ToString());
             ExtremeTrials = all.Where(d => d.ContentType.Value.RowId == 4
-                && (d.Name.RawString.Contains("(Extreme)") || d.Name.RawString.Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase))).ToDictionary(d => d.RowId, d => d.Name.RawString);
-            AllianceRaids = all.Where(d => d.ContentType.Value.RowId == 5 && d.ContentMemberType.Value.TanksPerParty == 1).ToDictionary(d => d.RowId, d => d.Name.RawString);
-            Guildhests = all.Where(d => d.ContentType.Value.RowId == 3).ToDictionary(d => d.RowId, d => d.Name.RawString);
-            PVP = all.Where(d => d.ContentType.Value.RowId == 6).ToDictionary(d => d.RowId, d => d.Name.RawString);
-            DoL = all.Where(d => d.ContentType.Value.RowId == 16).ToDictionary(d => d.RowId, d => d.Name.RawString);
-            DeepDungeons = all.Where(d => d.ContentType.Value.RowId == 21).ToDictionary(d => d.RowId, d => d.Name.RawString);
+                && (d.Name.ToString().Contains("(Extreme)") || d.Name.ToString().Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase))).ToDictionary(d => d.RowId, d => d.Name.ToString());
+            AllianceRaids = all.Where(d => d.ContentType.Value.RowId == 5 && d.ContentMemberType.Value.TanksPerParty == 1).ToDictionary(d => d.RowId, d => d.Name.ToString());
+            Guildhests = all.Where(d => d.ContentType.Value.RowId == 3).ToDictionary(d => d.RowId, d => d.Name.ToString());
+            PVP = all.Where(d => d.ContentType.Value.RowId == 6).ToDictionary(d => d.RowId, d => d.Name.ToString());
+            DoL = all.Where(d => d.ContentType.Value.RowId == 16).ToDictionary(d => d.RowId, d => d.Name.ToString());
+            DeepDungeons = all.Where(d => d.ContentType.Value.RowId == 21).ToDictionary(d => d.RowId, d => d.Name.ToString());
         }
 
         public static IList<DutyEntry> GetBlankDutyEntyList()

@@ -1,4 +1,4 @@
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
@@ -38,7 +38,7 @@ namespace MentorRouletteCounter.DutyTracking
             StoreDoneDuty(content, elapsedTime);
 
             //Check if the current player is a mentor and add this duty to the mentor duties
-            if (Service.Client.LocalPlayer.OnlineStatus.GameData.Name.RawString.Contains("Mentor", StringComparison.OrdinalIgnoreCase))
+            if (Service.Client.LocalPlayer.OnlineStatus.Value.Name.ToString().Contains("Mentor", StringComparison.OrdinalIgnoreCase))
             {
                 StoreDoneMentorDuty(content, elapsedTime);
             }
@@ -47,7 +47,7 @@ namespace MentorRouletteCounter.DutyTracking
         private void StoreDoneMentorDuty(ContentFinderCondition content, TimeSpan elapsedTime)
         {
             var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.RowId == content.RowId);
-            string jobName = Service.Client.LocalPlayer.ClassJob.GameData.Name;
+            string jobName = Service.Client.LocalPlayer.ClassJob.Value.Name.ToString();
             Logger.Log($"Finished duty '{duty.Name}' in mentor roulette in '{elapsedTime}' as '{jobName}'");
             _flatDoneMentorDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName));
         }
@@ -55,7 +55,7 @@ namespace MentorRouletteCounter.DutyTracking
         private void StoreDoneDuty(ContentFinderCondition content, TimeSpan elapsedTime)
         {
             var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.RowId == content.RowId);
-            string jobName = Service.Client.LocalPlayer.ClassJob.GameData.Name;
+            string jobName = Service.Client.LocalPlayer.ClassJob.Value.Name.ToString();
             Logger.Log($"Finished duty '{duty.Name}' in '{elapsedTime}' as '{jobName}'");
             _flatDoneDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName));
         }

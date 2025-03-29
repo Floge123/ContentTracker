@@ -1,5 +1,5 @@
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,7 +23,7 @@ namespace MentorRouletteCounter.PeopleTracking
                 var name = member.NameString;
                 if (name == Service.Client.LocalPlayer.Name.TextValue || string.IsNullOrEmpty(name))
                     continue;
-                writer.WriteLine(new PeopleEntry(name, content.Name, DateTime.Now).AsCsv());
+                writer.WriteLine(new PeopleEntry(name, content.Name.ToString(), DateTime.Now).AsCsv());
             }
         }
     }
