@@ -2,7 +2,6 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Lumina.Excel.Sheets;
 using MentorRouletteCounter.DutyTracking;
-using MentorRouletteCounter.GilTracking;
 using MentorRouletteCounter.PeopleTracking;
 using System;
 
@@ -11,7 +10,6 @@ namespace MentorRouletteCounter
     public sealed class Plugin : IDalamudPlugin
     {
         private readonly DutyTracker _dutyTracker;
-        private readonly GilTracker _gilTracker;
         private readonly PeopleTracker _peopleTracker;
 
         public string Name => "Mentor Roulette Tracker";
@@ -21,21 +19,18 @@ namespace MentorRouletteCounter
 
         public Plugin(IDalamudPluginInterface pluginInterface)
         {
-            PluginInterface = pluginInterface;
-            Service.Initialize(pluginInterface);
-
-            Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-            Configuration.Initialize(PluginInterface);
-            ContentRepository.Initialize();
-
             try
             {
+                PluginInterface = pluginInterface;
+                Service.Initialize(pluginInterface);
+
+                Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+                Configuration.Initialize(PluginInterface);
+                ContentRepository.Initialize();
+
                 _dutyTracker = new DutyTracker();               
                 Service.Duty.DutyStarted += Duty_DutyStarted;
                 Service.Duty.DutyCompleted += Duty_DutyCompleted;
-
-                _gilTracker = new GilTracker(TimeSpan.FromMinutes(5));
-                _gilTracker.Start();
 
                 _peopleTracker = new PeopleTracker();
             }
@@ -48,7 +43,9 @@ namespace MentorRouletteCounter
 
         private void Duty_DutyStarted(object? sender, ushort e)
         {
-            _dutyTracker.Start();
+            var territory = Service.GameData.Excel.GetSheet<TerritoryType>()?.GetRow(e);
+            var content = territory?.ContentFinderCondition.Value;
+            _dutyTracker.Start(content);
         }
 
         private void Duty_DutyCompleted(object? sender, ushort e)
@@ -75,7 +72,6 @@ namespace MentorRouletteCounter
         {
             Service.Duty.DutyStarted -= Duty_DutyStarted;
             Service.Duty.DutyCompleted -= Duty_DutyCompleted;
-            _gilTracker.Stop();
         }
     }
 }

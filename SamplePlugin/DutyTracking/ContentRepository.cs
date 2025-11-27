@@ -17,25 +17,36 @@ namespace MentorRouletteCounter.DutyTracking
         public static IDictionary<uint, string> PVP { get; private set; }
         public static IDictionary<uint, string> DoL { get; private set; }
         public static IDictionary<uint, string> DeepDungeons { get; private set; }
+        public static IDictionary<uint, string> All { get; private set; }
 
         public static void Initialize()
         {
             var all = Service.GameData.GetExcelSheet<ContentFinderCondition>().ToList();
 
-            Dungeons = all.Where(d => d.ContentType.Value.RowId == 2).ToDictionary(d => d.RowId, d => d.Name.ToString());
+            All = all.ToDictionary(d => d.RowId, d => d.Name.ExtractText());
+
+            Dungeons = all.Where(d => d.ContentType.Value.RowId == 2).ToDictionary(d => d.RowId, d => d.Name.ExtractText());
+
             var raids = all.Where(d => d.ContentType.Value.RowId == 5 && d.ContentMemberType.Value.TanksPerParty > 1).ToList();
-            NormalRaids = raids.Where(d => !d.Name.ToString().Contains("(Savage)") && !d.Name.ToString().Contains("(episch)")).ToDictionary(d => d.RowId, d => d.Name.ToString());
-            SavageRaids = raids.Where(d => d.Name.ToString().Contains("(Savage)") || d.Name.ToString().Contains("(episch)")).ToDictionary(d => d.RowId, d => d.Name.ToString());
+            NormalRaids = raids.Where(d => !d.Name.ExtractText().Contains("(Savage)") && !d.Name.ExtractText().Contains("(episch)")).ToDictionary(d => d.RowId, d => d.Name.ExtractText());
+            SavageRaids = raids.Where(d => d.Name.ExtractText().Contains("(Savage)") || d.Name.ExtractText().Contains("(episch)")).ToDictionary(d => d.RowId, d => d.Name.ExtractText());
+            
             NormalTrials = all.Where(d => d.ContentType.Value.RowId == 4
-                && !d.Name.ToString().Contains("(Extreme)")
-                && !d.Name.ToString().Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase)).ToDictionary(d => d.RowId, d => d.Name.ToString());
+                && !d.Name.ExtractText().Contains("(Extreme)")
+                && !d.Name.ExtractText().Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase)).ToDictionary(d => d.RowId, d => d.Name.ExtractText());
+            
             ExtremeTrials = all.Where(d => d.ContentType.Value.RowId == 4
-                && (d.Name.ToString().Contains("(Extreme)") || d.Name.ToString().Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase))).ToDictionary(d => d.RowId, d => d.Name.ToString());
-            AllianceRaids = all.Where(d => d.ContentType.Value.RowId == 5 && d.ContentMemberType.Value.TanksPerParty == 1).ToDictionary(d => d.RowId, d => d.Name.ToString());
-            Guildhests = all.Where(d => d.ContentType.Value.RowId == 3).ToDictionary(d => d.RowId, d => d.Name.ToString());
-            PVP = all.Where(d => d.ContentType.Value.RowId == 6).ToDictionary(d => d.RowId, d => d.Name.ToString());
-            DoL = all.Where(d => d.ContentType.Value.RowId == 16).ToDictionary(d => d.RowId, d => d.Name.ToString());
-            DeepDungeons = all.Where(d => d.ContentType.Value.RowId == 21).ToDictionary(d => d.RowId, d => d.Name.ToString());
+                && (d.Name.ExtractText().Contains("(Extreme)") || d.Name.ExtractText().Contains("The Minstrel's Ballad:", StringComparison.OrdinalIgnoreCase))).ToDictionary(d => d.RowId, d => d.Name.ExtractText());
+            
+            AllianceRaids = all.Where(d => d.ContentType.Value.RowId == 5 && d.ContentMemberType.Value.TanksPerParty == 1).ToDictionary(d => d.RowId, d => d.Name.ExtractText());
+            
+            Guildhests = all.Where(d => d.ContentType.Value.RowId == 3).ToDictionary(d => d.RowId, d => d.Name.ExtractText());
+            
+            PVP = all.Where(d => d.ContentType.Value.RowId == 6).ToDictionary(d => d.RowId, d => d.Name.ExtractText());
+            
+            DoL = all.Where(d => d.ContentType.Value.RowId == 16).ToDictionary(d => d.RowId, d => d.Name.ExtractText());
+            
+            DeepDungeons = all.Where(d => d.ContentType.Value.RowId == 21).ToDictionary(d => d.RowId, d => d.Name.ExtractText());
         }
 
         public static IList<DutyEntry> GetBlankDutyEntyList()

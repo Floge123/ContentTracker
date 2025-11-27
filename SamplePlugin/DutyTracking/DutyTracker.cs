@@ -1,9 +1,14 @@
+using Dalamud.Game.Command;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using Lumina.Data.Parsing;
 using Lumina.Excel.Sheets;
 using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace MentorRouletteCounter.DutyTracking
 {
@@ -22,26 +27,80 @@ namespace MentorRouletteCounter.DutyTracking
             _flatDoneDuties = new List<DutyEntry>();
             _flatDoneMentorDuties = new List<DutyEntry>();
             ReadExportedStates();
+            AddCommand();           
         }
 
-        public void Start()
+        private void AddCommand()
         {
-            Logger.Log("Duty started");
+            Service.Commands.AddHandler("/duty", new CommandInfo((command, arguments) =>
+            {
+                if (string.IsNullOrEmpty(arguments))
+                {
+                    Service.Chat.PrintError("No duty name provided to /duty.");
+                    return;
+                }
+
+                try
+                {
+                    Logger.Log(arguments);
+                    foreach (var item in GetMatchingDuties(ContentRepository.All.Values.Distinct().ToList(), arguments))
+                    {
+                        Service.Chat.Print($"Duty Info for {item}");
+                        PrintDutyInfo(item);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log(ex.Message);
+                }
+            })
+            {
+                HelpMessage = "Print info about provided duty.",
+                ShowInHelp = true,                
+            });
+        }
+
+        public void Start(ContentFinderCondition? content)
+        {
+            if (content != null)
+            {
+                Logger.Log($"Duty started {content?.Name} ({content?.RowId})");
+                PrintDutyInfo(content!.Value.Name.ToString());
+            }
             _currentStartTime = DateTime.Now;
+        }
+
+        private List<string> GetMatchingDuties(ICollection<string> duties, string query)
+        {
+            return [.. duties.Where(d => d.Contains(query, StringComparison.OrdinalIgnoreCase))];
+        }
+
+        private void PrintDutyInfo(string duty)
+        {           
+            var duties = _flatDoneDuties.Where(d => d.Name.Equals(duty, StringComparison.OrdinalIgnoreCase)).ToList();
+            var mentorDuties = _flatDoneMentorDuties.Where(d => d.Name.Equals(duty, StringComparison.OrdinalIgnoreCase)).ToList();
+            //Service.Chat.Print($"Duty started {content?.Name}");
+            Service.Chat.Print($"\tTotal: {duties.Count} | Time: {new TimeSpan(duties.Sum(d => d.ElapsedTime.Ticks)):hh':'mm':'ss}");
+            Service.Chat.Print($"\tMentor: {mentorDuties.Count} | Time: {new TimeSpan(mentorDuties.Sum(d => d.ElapsedTime.Ticks)):hh':'mm':'ss}");
         }
 
         public void End(ContentFinderCondition content)
         {
-            Logger.Log($"Done Duty {content.Name} ({content.RowId})");
-            _currentEndTime = DateTime.Now;
-            var elapsedTime = _currentEndTime - _currentStartTime;
-            StoreDoneDuty(content, elapsedTime);
-
-            //Check if the current player is a mentor and add this duty to the mentor duties
-            if (Service.Client.LocalPlayer.OnlineStatus.Value.Name.ToString().Contains("Mentor", StringComparison.OrdinalIgnoreCase))
+            Logger.Log($"Done Duty {content.Name} ({content.RowId})");           
+            Service.Framework.RunOnFrameworkThread(() =>
             {
-                StoreDoneMentorDuty(content, elapsedTime);
-            }
+                _currentEndTime = DateTime.Now;
+                var elapsedTime = _currentEndTime - _currentStartTime;
+                StoreDoneDuty(content, elapsedTime);
+
+                //Check if the current player is a mentor and add this duty to the mentor duties
+                if (Service.Client.LocalPlayer.OnlineStatus.Value.Name.ToString().Contains("Mentor", StringComparison.OrdinalIgnoreCase))
+                {
+                    StoreDoneMentorDuty(content, elapsedTime);
+                }
+
+                PrintDutyInfo(content.Name.ToString());
+            });
         }
 
         private void StoreDoneMentorDuty(ContentFinderCondition content, TimeSpan elapsedTime)
@@ -57,6 +116,7 @@ namespace MentorRouletteCounter.DutyTracking
             var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.RowId == content.RowId);
             string jobName = Service.Client.LocalPlayer.ClassJob.Value.Name.ToString();
             Logger.Log($"Finished duty '{duty.Name}' in '{elapsedTime}' as '{jobName}'");
+            Service.Chat.Print($"Finished duty '{duty.Name}' in '{elapsedTime}' as '{jobName}'");
             _flatDoneDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName));
         }
 

@@ -20,6 +20,7 @@ namespace MentorRouletteCounter
         [PluginService] public static IGameInteropProvider Interop { get; private set; } = null!;
         [PluginService] public static IClientState Client { get; private set; } = null!;
         [PluginService] public static IDutyState Duty { get; private set; } = null!;
+        [PluginService] public static IFramework Framework { get; private set; } = null!;
 
         // @formatter:on
     }

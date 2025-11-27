@@ -15,16 +15,19 @@ namespace MentorRouletteCounter.PeopleTracking
 
         public unsafe void Track(ContentFinderCondition content)
         {
-            Span<PartyMember> members = GroupManager.Instance()->MainGroup.PartyMembers;
-            using var writer = new StreamWriter(ExportPath, true);
-            PathHelper.EnsurePathExists(ExportPath);
-            foreach (var member in members)
+            Service.Framework.RunOnFrameworkThread(() =>
             {
-                var name = member.NameString;
-                if (name == Service.Client.LocalPlayer.Name.TextValue || string.IsNullOrEmpty(name))
-                    continue;
-                writer.WriteLine(new PeopleEntry(name, content.Name.ToString(), DateTime.Now).AsCsv());
-            }
+                Span<PartyMember> members = GroupManager.Instance()->MainGroup.PartyMembers;
+                using var writer = new StreamWriter(ExportPath, true);
+                PathHelper.EnsurePathExists(ExportPath);
+                foreach (var member in members)
+                {
+                    var name = member.NameString;
+                    if (name == Service.Client.LocalPlayer.Name.TextValue || string.IsNullOrEmpty(name))
+                        continue;
+                    writer.WriteLine(new PeopleEntry(name, content.Name.ToString(), DateTime.Now).AsCsv());
+                }
+            });
         }
     }
 }
