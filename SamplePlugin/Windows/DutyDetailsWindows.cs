@@ -28,7 +28,7 @@ namespace MentorRouletteCounter.Windows
             Entries = entries.Where(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             SizeConstraints = new WindowSizeConstraints
             {
-                MinimumSize = new Vector2(500, 330),
+                MinimumSize = new Vector2(700, 330),
                 MaximumSize = new Vector2(float.MaxValue, 700)
             };
         }

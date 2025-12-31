@@ -58,8 +58,10 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                 ImGui.TableSetupScrollFreeze(0, 1);
                 ImGui.TableHeadersRow();
 
+                int i = 0;
                 foreach (var item in entries.OrderByDescending(e => e.TimeStamp))
                 {
+                    ImGui.PushID(i++);
                     ImGui.TableNextRow();
                     ImGui.TableSetColumnIndex(0);
                     ImGui.Text(item.TimeStamp.ToString());
@@ -71,11 +73,10 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                     ImGui.Text(item.ElapsedTime.ToString());
 
                     ImGui.TableSetColumnIndex(4);
-                    if (ImGui.Button($"Open Details...##{item.Name}"))
+                    if (ImGui.Button($"Open Details..."))
                     {
                         try
                         {
-                            Service.Chat.Print(item.Name);
                             var details = new DutyDetailsWindows(item.Name, currentEntries ?? []);
                             Service.WindowSystem.AddWindow(details);
                             detailsWindows.Add(details);
