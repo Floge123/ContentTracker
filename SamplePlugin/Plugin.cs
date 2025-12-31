@@ -49,6 +49,7 @@ namespace MentorRouletteCounter
 
         public void Dispose()
         {
+            TrackerManager.Dispose();
             // Unregister all actions to not leak anything during disposal of plugin
             PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
             PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;

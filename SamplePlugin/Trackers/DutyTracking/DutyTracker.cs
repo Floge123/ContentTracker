@@ -144,7 +144,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                 StoreDoneDuty(content, elapsedTime);
 
                 //Check if the current player is a mentor and add this duty to the mentor duties
-                if (Service.PlayerState.IsMentor)
+                if (Service.Client.LocalPlayer.OnlineStatus.Value.Name.ToString().Contains("Mentor", StringComparison.OrdinalIgnoreCase))
                 {
                     StoreDoneMentorDuty(content, elapsedTime);
                 }
