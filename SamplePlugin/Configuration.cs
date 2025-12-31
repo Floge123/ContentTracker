@@ -15,14 +15,8 @@ namespace MentorRouletteCounter
         [NonSerialized]
         private IDalamudPluginInterface? PluginInterface;
 
-        public void Initialize(IDalamudPluginInterface pluginInterface)
-        {
-            this.PluginInterface = pluginInterface;
-        }
+        public void Initialize(IDalamudPluginInterface pluginInterface) => this.PluginInterface = pluginInterface;
 
-        public void Save()
-        {
-            this.PluginInterface!.SavePluginConfig(this);
-        }
+        public void Save() => this.PluginInterface!.SavePluginConfig(this);
     }
 }

@@ -1,6 +1,6 @@
 using System;
 
-namespace MentorRouletteCounter.DutyTracking
+namespace MentorRouletteCounter.Trackers.DutyTracking
 {
     internal class DutyEntry : IEquatable<DutyEntry>
     {
@@ -42,10 +42,7 @@ namespace MentorRouletteCounter.DutyTracking
             return new DutyEntry(timestamp, Enum.Parse<DutyType>(csv[1]), csv[2], time, csv[4]);
         }
 
-        public string AsCsv()
-        {
-            return $"{TimeStamp},{Type},{Name.Replace(",", ";")},{ElapsedTime},{JobName}";
-        }
+        public string AsCsv() => $"{TimeStamp},{Type},{Name.Replace(",", ";")},{ElapsedTime},{JobName}";
 
         public bool Equals(DutyEntry? other)
         {

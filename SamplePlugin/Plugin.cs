@@ -1,21 +1,22 @@
-using Dalamud.IoC;
+using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
-using Lumina.Excel.Sheets;
-using MentorRouletteCounter.DutyTracking;
-using MentorRouletteCounter.PeopleTracking;
+using MentorRouletteCounter.Trackers;
+using MentorRouletteCounter.Windows;
 using System;
 
 namespace MentorRouletteCounter
 {
     public sealed class Plugin : IDalamudPlugin
     {
-        private readonly DutyTracker _dutyTracker;
-        private readonly PeopleTracker _peopleTracker;
+        private const string MainCommand = "/dutytracker";
 
-        public string Name => "Mentor Roulette Tracker";
+        public string Name => "Duty Tracker";
 
         private IDalamudPluginInterface PluginInterface { get; init; }
         public Configuration Configuration { get; init; }
+        public readonly WindowSystem WindowSystem = new("Duty Tracker");
+        private MainWindow MainWindow { get; init; }
+        private ITrackerManager TrackerManager { get; init; }
 
         public Plugin(IDalamudPluginInterface pluginInterface)
         {
@@ -24,43 +25,21 @@ namespace MentorRouletteCounter
                 PluginInterface = pluginInterface;
                 Service.Initialize(pluginInterface);
 
+                MainWindow = new MainWindow(this);
+                Service.Commands.AddHandler(MainCommand, new Dalamud.Game.Command.CommandInfo(OnMainCommand)
+                {
+                    HelpMessage = "Shows the main UI"
+                });
+
+                PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
+                PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
+                PluginInterface.UiBuilder.OpenConfigUi += ToggleMainUi;
+
                 Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
                 Configuration.Initialize(PluginInterface);
-                ContentRepository.Initialize();
 
-                _dutyTracker = new DutyTracker();               
-                Service.Duty.DutyStarted += Duty_DutyStarted;
-                Service.Duty.DutyCompleted += Duty_DutyCompleted;
-
-                _peopleTracker = new PeopleTracker();
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex.ToString());
-            }
-        }
-
-
-        private void Duty_DutyStarted(object? sender, ushort e)
-        {
-            var territory = Service.GameData.Excel.GetSheet<TerritoryType>()?.GetRow(e);
-            var content = territory?.ContentFinderCondition.Value;
-            _dutyTracker.Start(content);
-        }
-
-        private void Duty_DutyCompleted(object? sender, ushort e)
-        {
-            try
-            {
-                var territory = Service.GameData.Excel.GetSheet<TerritoryType>()?.GetRow(e);
-                var content = territory?.ContentFinderCondition.Value;
-                if (content is null)
-                    return;
-
-                _dutyTracker.End(content.Value);
-                _dutyTracker.ExportAsCsv();
-
-                _peopleTracker.Track(content.Value);
+                TrackerManager = new TrackerManager();
+                TrackerManager.Initialize();
             }
             catch (Exception ex)
             {
@@ -70,8 +49,19 @@ namespace MentorRouletteCounter
 
         public void Dispose()
         {
-            Service.Duty.DutyStarted -= Duty_DutyStarted;
-            Service.Duty.DutyCompleted -= Duty_DutyCompleted;
+            // Unregister all actions to not leak anything during disposal of plugin
+            PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
+            PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
+
+            WindowSystem.RemoveAllWindows();
+
+            MainWindow.Dispose();
+
+            Service.Commands.RemoveHandler(MainCommand);
         }
+
+        private void ToggleMainUi() => MainWindow.Toggle();
+
+        private void OnMainCommand(string command, string arguments) => MainWindow.Toggle();
     }
 }

@@ -1,4 +1,4 @@
-namespace MentorRouletteCounter.DutyTracking
+namespace MentorRouletteCounter.Trackers.DutyTracking
 {
     internal enum DutyType
     {

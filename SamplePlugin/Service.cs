@@ -1,4 +1,3 @@
-using Dalamud.Game;
 using Dalamud.IoC;
 using Dalamud.Plugin.Services;
 using Dalamud.Plugin;
@@ -21,7 +20,8 @@ namespace MentorRouletteCounter
         [PluginService] public static IClientState Client { get; private set; } = null!;
         [PluginService] public static IDutyState Duty { get; private set; } = null!;
         [PluginService] public static IFramework Framework { get; private set; } = null!;
-
+        [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
+        [PluginService] internal static IPlayerState PlayerState { get; private set; } = null!;
         // @formatter:on
     }
 }
