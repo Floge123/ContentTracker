@@ -10,6 +10,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
         public DutyType Type { get; set; }
         public TimeSpan ElapsedTime { get; set; }
         public string JobName { get; set; }
+        public bool AsMentor { get; set; }
 
         public DutyEntry(DutyType type, string name, uint id)
         {
@@ -18,13 +19,14 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             RowId = id;
         }
 
-        public DutyEntry(DateTime timeStamp, DutyType type, string name, TimeSpan time, string jobName)
+        public DutyEntry(DateTime timeStamp, DutyType type, string name, TimeSpan time, string jobName, bool asMentor)
         {
             TimeStamp = timeStamp;
             Name = name;
             Type = type;
             ElapsedTime = time;
             JobName = jobName;
+            AsMentor = asMentor;
         }
 
         public static DutyEntry FromCsv(string[] csv)
@@ -39,10 +41,15 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             {
                 time = t;
             }
-            return new DutyEntry(timestamp, Enum.Parse<DutyType>(csv[1]), csv[2], time, csv[4]);
+            bool asMentor = false;
+            if (csv.Length > 5 && bool.TryParse(csv[5], out var b))
+            {
+                asMentor = b;
+            }
+            return new DutyEntry(timestamp, Enum.Parse<DutyType>(csv[1]), csv[2], time, csv[4], asMentor);
         }
 
-        public string AsCsv() => $"{TimeStamp},{Type},{Name.Replace(",", ";")},{ElapsedTime},{JobName}";
+        public string AsCsv() => $"{TimeStamp},{Type},{Name.Replace(",", ";")},{ElapsedTime},{JobName},{AsMentor}";
 
         public bool Equals(DutyEntry? other)
         {

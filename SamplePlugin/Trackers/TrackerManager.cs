@@ -6,7 +6,7 @@ namespace MentorRouletteCounter.Trackers
 {
     internal class TrackerManager : ITrackerManager
     {
-        private readonly List<ITracker> _trackers = [];
+        private readonly List<IDrawableTracker> _trackers = [];
 
         public TrackerManager()
         {
@@ -19,6 +19,8 @@ namespace MentorRouletteCounter.Trackers
                 item.Dispose();
             }
         }
+
+        public IEnumerable<IDrawableTracker> GetTrackers() => _trackers;
 
         public void Initialize()
         {
@@ -36,7 +38,7 @@ namespace MentorRouletteCounter.Trackers
 
             foreach (var item in attributes)
             {
-                var tracker = Activator.CreateInstance(item.TrackerType) as ITracker;
+                var tracker = Activator.CreateInstance(item.TrackerType) as IDrawableTracker;
                 if (tracker != null)
                     _trackers.Add(tracker);
             }

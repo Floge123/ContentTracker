@@ -14,9 +14,8 @@ namespace MentorRouletteCounter
 
         private IDalamudPluginInterface PluginInterface { get; init; }
         public Configuration Configuration { get; init; }
-        public readonly WindowSystem WindowSystem = new("Duty Tracker");
         private MainWindow MainWindow { get; init; }
-        private ITrackerManager TrackerManager { get; init; }
+        internal ITrackerManager TrackerManager { get; init; }
 
         public Plugin(IDalamudPluginInterface pluginInterface)
         {
@@ -26,12 +25,13 @@ namespace MentorRouletteCounter
                 Service.Initialize(pluginInterface);
 
                 MainWindow = new MainWindow(this);
+                Service.WindowSystem.AddWindow(MainWindow);
                 Service.Commands.AddHandler(MainCommand, new Dalamud.Game.Command.CommandInfo(OnMainCommand)
                 {
                     HelpMessage = "Shows the main UI"
                 });
 
-                PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
+                PluginInterface.UiBuilder.Draw += Service.WindowSystem.Draw;
                 PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
                 PluginInterface.UiBuilder.OpenConfigUi += ToggleMainUi;
 
@@ -50,11 +50,12 @@ namespace MentorRouletteCounter
         public void Dispose()
         {
             TrackerManager.Dispose();
+
             // Unregister all actions to not leak anything during disposal of plugin
-            PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
+            PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
             PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
 
-            WindowSystem.RemoveAllWindows();
+            Service.WindowSystem.RemoveAllWindows();
 
             MainWindow.Dispose();
 

@@ -12,20 +12,20 @@ using System.Linq;
 
 namespace MentorRouletteCounter.Trackers.DutyTracking
 {
-    internal sealed class DutyTracker : ITracker
+    internal sealed class DutyTracker : IDrawableTracker
     {
         private static readonly string ExportFlatPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\Export_all.txt";
         private static readonly string ExportFlatMentorRoulettePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MentorRoulette\\Export_Mentor_all.txt";
-
-        private IList<DutyEntry> _flatDoneDuties;
-        private IList<DutyEntry> _flatDoneMentorDuties;
-        private DateTime _currentStartTime;
-        private DateTime _currentEndTime;
+        private readonly DutyVisualization dutyVisualization = new();
+        private IList<DutyEntry> flatDoneDuties;
+        private IList<DutyEntry> flatDoneMentorDuties;
+        private DateTime currentStartTime;
+        private DateTime currentEndTime;
 
         public DutyTracker()
         {
-            _flatDoneDuties = new List<DutyEntry>();
-            _flatDoneMentorDuties = new List<DutyEntry>();
+            flatDoneDuties = new List<DutyEntry>();
+            flatDoneMentorDuties = new List<DutyEntry>();
             
             AddCommand();
         }
@@ -43,6 +43,11 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
         {
             Service.Duty.DutyStarted -= Duty_DutyStarted;
             Service.Duty.DutyCompleted -= Duty_DutyCompleted;
+        }
+
+        public void Draw()
+        {
+            dutyVisualization?.Draw(flatDoneDuties, flatDoneMentorDuties);
         }
 
         private void AddCommand() => Service.Commands.AddHandler("/duty", new CommandInfo((command, arguments) =>
@@ -104,15 +109,15 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                 Logger.Log($"Duty started {content?.Name} ({content?.RowId})");
                 PrintDutyInfo(content!.Value.Name.ToString());
             }
-            _currentStartTime = DateTime.Now;
+            currentStartTime = DateTime.Now;
         }
 
         private List<string> GetMatchingDuties(ICollection<string> duties, string query) => [.. duties.Where(d => d.Contains(query, StringComparison.OrdinalIgnoreCase))];
 
         private void PrintDutyInfo(string duty)
         {
-            PrintDutyInfo(_flatDoneDuties, duty, "Total");
-            PrintDutyInfo(_flatDoneMentorDuties, duty, "Mentor");
+            PrintDutyInfo(flatDoneDuties, duty, "Total");
+            PrintDutyInfo(flatDoneMentorDuties, duty, "Mentor");
         }
 
         private void PrintDutyInfo(IList<DutyEntry> duties, string duty, string prefix)
@@ -139,50 +144,40 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             Logger.Log($"Done Duty {content.Name} ({content.RowId})");
             Service.Framework.RunOnFrameworkThread(() =>
             {
-                _currentEndTime = DateTime.Now;
-                var elapsedTime = _currentEndTime - _currentStartTime;
-                StoreDoneDuty(content, elapsedTime);
-
-                //Check if the current player is a mentor and add this duty to the mentor duties
-                if (Service.Client.LocalPlayer.OnlineStatus.Value.Name.ToString().Contains("Mentor", StringComparison.OrdinalIgnoreCase))
-                {
-                    StoreDoneMentorDuty(content, elapsedTime);
-                }
+                currentEndTime = DateTime.Now;
+                var elapsedTime = currentEndTime - currentStartTime;
+                bool asMentor = Service.Client.LocalPlayer.OnlineStatus.Value.Name.ToString().Contains("Mentor", StringComparison.OrdinalIgnoreCase);
+                StoreDoneDuty(content, elapsedTime, asMentor);
 
                 PrintDutyInfo(content.Name.ToString());
             });
         }
 
-        private void StoreDoneMentorDuty(ContentFinderCondition content, TimeSpan elapsedTime)
-        {
-            var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.RowId == content.RowId);
-            string jobName = Service.PlayerState.ClassJob.Value.Name.ToString();
-            Logger.Log($"Finished duty '{duty.Name}' in mentor roulette in '{elapsedTime}' as '{jobName}'");
-            _flatDoneMentorDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName));
-        }
-
-        private void StoreDoneDuty(ContentFinderCondition content, TimeSpan elapsedTime)
+        private void StoreDoneDuty(ContentFinderCondition content, TimeSpan elapsedTime, bool asMentor)
         {
             var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.RowId == content.RowId);
             string jobName = Service.PlayerState.ClassJob.Value.Name.ToString();
             Logger.Log($"Finished duty '{duty.Name}' in '{elapsedTime}' as '{jobName}'");
             Service.Chat.Print($"Finished duty '{duty.Name}' in '{elapsedTime}' as '{jobName}'");
-            _flatDoneDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName));
+            flatDoneDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName, asMentor));
+
+            if (asMentor)
+                flatDoneMentorDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName, true));
         }
 
         private void ExportAsCsv()
         {
-            Export(ExportFlatPath, _flatDoneDuties);
-            Export(ExportFlatMentorRoulettePath, _flatDoneMentorDuties);
+            Export(ExportFlatPath, flatDoneDuties);
+            Export(ExportFlatMentorRoulettePath, flatDoneMentorDuties);
         }
 
         private void ReadExportedStates()
         {
-            ReadFlatDuties(ExportFlatPath, _flatDoneDuties);
-            ReadFlatDuties(ExportFlatMentorRoulettePath, _flatDoneMentorDuties);
+            ReadFlatDuties(ExportFlatMentorRoulettePath, flatDoneMentorDuties, true);
+            ReadFlatDuties(ExportFlatPath, flatDoneDuties, false);
         }
 
-        private void ReadFlatDuties(string path, IList<DutyEntry> duties)
+        private void ReadFlatDuties(string path, IList<DutyEntry> duties, bool asMentor)
         {
             PathHelper.EnsurePathExists(path);
             using var parser = new TextFieldParser(path);
@@ -192,6 +187,9 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             {
                 var fields = parser.ReadFields();
                 var readDuty = DutyEntry.FromCsv(fields);
+                if (asMentor || flatDoneMentorDuties.Contains(readDuty))
+                    readDuty.AsMentor = true;
+
                 duties.Add(readDuty);
             }
         }
