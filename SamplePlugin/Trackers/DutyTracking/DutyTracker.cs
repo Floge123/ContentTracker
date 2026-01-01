@@ -128,10 +128,10 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             Service.Chat.Print($"\t{prefix}: {filtered.Count} | Time: {FormatTime(new TimeSpan(filtered.Sum(d => d.ElapsedTime.Ticks)))}");
 
             if (earliest != default)
-                Service.Chat.Print($"\t\tEarliest: {earliest}");
+                Service.Chat.Print($"\t\tEarliest: {earliest:G}");
 
             if (latest != default)
-                Service.Chat.Print($"\t\tLatest: {latest}");
+                Service.Chat.Print($"\t\tLatest: {latest:G}");
         }
 
         private string FormatTime(TimeSpan span) => string.Format("{0}hr {1}mn {2}sec",

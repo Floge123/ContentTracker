@@ -64,7 +64,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                     ImGui.PushID(i++);
                     ImGui.TableNextRow();
                     ImGui.TableSetColumnIndex(0);
-                    ImGui.Text(item.TimeStamp.ToString());
+                    ImGui.Text($"{item.TimeStamp:G}");
                     ImGui.TableSetColumnIndex(1);
                     ImGui.Text(item.Name);
                     ImGui.TableSetColumnIndex(2);

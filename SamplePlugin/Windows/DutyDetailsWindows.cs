@@ -90,7 +90,7 @@ namespace MentorRouletteCounter.Windows
             if (entry is null)
                 return string.Empty;
 
-            return $"{entry.TimeStamp} as {entry.JobName} in {entry.ElapsedTime}";
+            return $"{entry.TimeStamp:G} as {entry.JobName} in {entry.ElapsedTime}";
         }
 
         private void DrawTable(IEnumerable<DutyEntry> entries)
@@ -109,7 +109,7 @@ namespace MentorRouletteCounter.Windows
                 {
                     ImGui.TableNextRow();
                     ImGui.TableSetColumnIndex(0);
-                    ImGui.Text(item.TimeStamp.ToString());
+                    ImGui.Text($"{item.TimeStamp:G}");
                     ImGui.TableSetColumnIndex(1);
                     ImGui.Text(item.Name);
 

@@ -49,7 +49,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             return new DutyEntry(timestamp, Enum.Parse<DutyType>(csv[1]), csv[2], time, csv[4], asMentor);
         }
 
-        public string AsCsv() => $"{TimeStamp},{Type},{Name.Replace(",", ";")},{ElapsedTime},{JobName},{AsMentor}";
+        public string AsCsv() => $"{TimeStamp:s},{Type},{Name.Replace(",", ";")},{ElapsedTime},{JobName},{AsMentor}";
 
         public bool Equals(DutyEntry? other)
         {
