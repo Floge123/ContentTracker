@@ -13,6 +13,18 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
         private string dutyFilter = string.Empty;
         private string jobFilter = string.Empty;
         private List<DutyDetailsWindows> detailsWindows = new();
+        private bool topMentorFilter = false;
+        private bool topByTime = false;
+
+        private Dictionary<DutyType, bool> typeFilters = [];
+
+        public DutyVisualization()
+        {
+            foreach (var item in Enum.GetValues<DutyType>())
+            {
+                typeFilters.Add(item, true);
+            }
+        }
 
 
         public void Dispose()
@@ -28,6 +40,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
         {
             currentEntries = entries;
 
+            DrawTopPage(entries);
             DrawEntries(entries, "All");
             DrawEntries(mentorEntries, "Mentor");
         }
@@ -45,6 +58,102 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                 ImGui.EndTabItem();
             }
         }
+
+        private void DrawTopPage(IEnumerable<DutyEntry> entries)
+        {
+            if (ImGui.BeginTabItem("Top Duties"))
+            {
+                if (ImGui.CollapsingHeader("Filter"))
+                {
+                    if (ImGui.BeginTable("Duty Type Filter#Table", 4))
+                    {
+                        foreach (var dutyType in Enum.GetValues<DutyType>())
+                        {
+                            var flag = typeFilters[dutyType];
+                            ImGui.TableNextColumn();
+                            ImGui.Checkbox($"{dutyType}##FilterCheckbox", ref flag);
+                            typeFilters[dutyType] = flag;
+                        }
+                        ImGui.EndTable();
+                    }
+                    ImGui.Separator();
+                    ImGui.Checkbox("Only Mentor Duties##FilterCheckbox", ref topMentorFilter);
+                    ImGui.Separator();
+                    ImGui.Checkbox("By Time", ref topByTime);
+                }
+
+                DrawTopTable(entries);
+
+                ImGui.EndTabItem();
+            }
+        }
+
+        private void DrawTopTable(IEnumerable<DutyEntry> entries)
+        {
+            IEnumerable<IGrouping<(string Name, DutyType Type), DutyEntry>> grouped = entries.Where(e => !topMentorFilter || e.AsMentor).GroupBy(e => (e.Name, e.Type));
+            var filtered = grouped.Where(g => typeFilters[g.Key.Type]);
+
+            if (ImGui.BeginTable("TopEntries", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Resizable))
+            {
+                ImGui.TableSetupColumn("Duty");
+                ImGui.TableSetupColumn("Count");
+                ImGui.TableSetupColumn("Earliest");
+                ImGui.TableSetupColumn("Latest");
+                ImGui.TableSetupColumn("Time");
+                ImGui.TableSetupColumn("Actions");
+                ImGui.TableSetupScrollFreeze(0, 1);
+                ImGui.TableHeadersRow();
+
+                int i = 0;
+                var ordered = topByTime
+                    ? filtered.OrderByDescending(e => e.Sum(e => e.ElapsedTime.TotalSeconds))
+                    : filtered.OrderByDescending(e => e.Count());
+
+                foreach (var item in ordered)
+                {
+                    ImGui.PushID(i++);
+                    ImGui.TableNextRow();
+
+                    ImGui.TableSetColumnIndex(0);
+                    ImGui.Text(item.Key.Name);
+
+                    ImGui.TableSetColumnIndex(1);
+                    ImGui.Text($"{item.Count()}");
+
+                    ImGui.TableSetColumnIndex(2);
+                    var sorted = item.OrderByDescending(e => e.TimeStamp);
+                    ImGui.Text($"{sorted.LastOrDefault()?.TimeStamp:G}");
+
+                    ImGui.TableSetColumnIndex(3);
+                    ImGui.Text($"{sorted.FirstOrDefault()?.TimeStamp:G}");
+
+                    ImGui.TableSetColumnIndex(4);
+                    ImGui.Text(FormatTime(TimeSpan.FromSeconds(item.Sum(e => e.ElapsedTime.TotalSeconds))));
+                    ImGui.TableSetColumnIndex(5);
+                    if (ImGui.Button($"Open Details...##TopTable"))
+                    {
+                        try
+                        {
+                            var details = new DutyDetailsWindows(item.Key.Name, item);
+                            Service.WindowSystem.AddWindow(details);
+                            detailsWindows.Add(details);
+                            details.Toggle();
+                        }
+                        catch (Exception)
+                        {
+                            //ignore
+                        }
+                    }
+                }
+
+                ImGui.EndTable();
+            }
+        }
+
+        private string FormatTime(TimeSpan span) => string.Format("{0}hr {1}mn {2}sec",
+                     (int)span.TotalHours,
+                     span.Minutes,
+                     span.Seconds);
 
         private void DrawTable(IEnumerable<DutyEntry> entries)
         {
@@ -70,7 +179,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                     ImGui.TableSetColumnIndex(2);
                     ImGui.Text(item.JobName);
                     ImGui.TableSetColumnIndex(3);
-                    ImGui.Text(item.ElapsedTime.ToString());
+                    ImGui.Text(FormatTime(item.ElapsedTime));
 
                     ImGui.TableSetColumnIndex(4);
                     if (ImGui.Button($"Open Details..."))

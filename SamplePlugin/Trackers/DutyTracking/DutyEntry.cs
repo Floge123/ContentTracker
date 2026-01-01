@@ -39,7 +39,8 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             var time = TimeSpan.Zero;
             if (TimeSpan.TryParse(csv[3], out var t))
             {
-                time = t;
+                if (t.TotalMinutes < 180)
+                    time = t;                
             }
             bool asMentor = false;
             if (csv.Length > 5 && bool.TryParse(csv[5], out var b))

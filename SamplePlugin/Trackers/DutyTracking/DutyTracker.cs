@@ -146,6 +146,9 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             {
                 currentEndTime = DateTime.Now;
                 var elapsedTime = currentEndTime - currentStartTime;
+                if (elapsedTime.TotalMinutes > 180)
+                    elapsedTime = TimeSpan.Zero;
+
                 bool asMentor = Service.Client.LocalPlayer.OnlineStatus.Value.Name.ToString().Contains("Mentor", StringComparison.OrdinalIgnoreCase);
                 StoreDoneDuty(content, elapsedTime, asMentor);
 

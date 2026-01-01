@@ -25,7 +25,7 @@ namespace MentorRouletteCounter.Windows
             : base($"Duty Details for '{name}'", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
         {
             Duty = name;
-            Entries = entries.Where(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            Entries = entries.Where(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase)).OrderByDescending(e => e.TimeStamp);
             SizeConstraints = new WindowSizeConstraints
             {
                 MinimumSize = new Vector2(700, 330),
