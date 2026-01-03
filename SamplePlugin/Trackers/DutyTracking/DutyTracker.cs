@@ -160,12 +160,13 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
         {
             var duty = ContentRepository.GetBlankDutyEntyList().First(d => d.RowId == content.RowId);
             string jobName = Service.PlayerState.ClassJob.Value.Name.ToString();
+            var character = Service.PlayerState.CharacterName;
             Logger.Log($"Finished duty '{duty.Name}' in '{elapsedTime}' as '{jobName}'");
             Service.Chat.Print($"Finished duty '{duty.Name}' in '{elapsedTime}' as '{jobName}'");
-            flatDoneDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName, asMentor));
+            flatDoneDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName, asMentor, character));
 
             if (asMentor)
-                flatDoneMentorDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName, true));
+                flatDoneMentorDuties.Add(new DutyEntry(DateTime.Now, duty.Type, duty.Name, elapsedTime, jobName, true, character));
         }
 
         private void ExportAsCsv()

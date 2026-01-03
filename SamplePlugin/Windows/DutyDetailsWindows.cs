@@ -14,6 +14,7 @@ namespace MentorRouletteCounter.Windows
     {
         private string jobFilter = string.Empty;
         private bool mentorFilter = false;
+        private bool allCharacters = false;
 
         public string Duty { get; init; }
         public IEnumerable<DutyEntry> Entries { get; init; }
@@ -75,8 +76,10 @@ namespace MentorRouletteCounter.Windows
                     ImGui.InputText("Job", ref jobFilter);
                     ImGui.SameLine();
                     ImGui.Checkbox("Only Mentor", ref mentorFilter);
+                    ImGui.SameLine();
+                    ImGui.Checkbox("All Characters", ref allCharacters);
 
-                    var filtered = Entries.Where(e => (jobFilter == string.Empty || e.JobName.Contains(jobFilter, StringComparison.OrdinalIgnoreCase)) && (!mentorFilter || e.AsMentor));
+                    var filtered = Entries.Where(e => (jobFilter == string.Empty || e.JobName.Contains(jobFilter, StringComparison.OrdinalIgnoreCase)) && (!mentorFilter || e.AsMentor) && (allCharacters || e.Character == string.Empty || e.Character == Service.PlayerState.CharacterName));
                     DrawTable(filtered);
                     ImGui.EndTabItem();
                 }
@@ -95,12 +98,13 @@ namespace MentorRouletteCounter.Windows
 
         private void DrawTable(IEnumerable<DutyEntry> entries)
         {
-            if (ImGui.BeginTable("Entries", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Resizable))
+            if (ImGui.BeginTable("Entries", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Resizable))
             {
                 ImGui.TableSetupColumn("Date");
                 ImGui.TableSetupColumn("Duty");
                 ImGui.TableSetupColumn("Job");
                 ImGui.TableSetupColumn("Time");
+                ImGui.TableSetupColumn("Character");
                 ImGui.TableSetupColumn("As Mentor?");
                 ImGui.TableSetupScrollFreeze(0, 1);
                 ImGui.TableHeadersRow();
@@ -120,6 +124,9 @@ namespace MentorRouletteCounter.Windows
                     ImGui.Text(item.ElapsedTime.ToString());
 
                     ImGui.TableSetColumnIndex(4);
+                    ImGui.Text(item.Character);
+
+                    ImGui.TableSetColumnIndex(5);
                     ImGui.Text(item.AsMentor ? "Yes" : "No");
                 }
 

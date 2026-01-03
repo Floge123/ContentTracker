@@ -15,6 +15,8 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
         private List<DutyDetailsWindows> detailsWindows = new();
         private bool topMentorFilter = false;
         private bool topByTime = false;
+        private bool allCharacters = false;
+        private List<string> characters = [];
 
         private Dictionary<DutyType, bool> typeFilters = [];
 
@@ -39,6 +41,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
         public void Draw(IEnumerable<DutyEntry> entries, IList<DutyEntry> mentorEntries)
         {
             currentEntries = entries;
+            characters = [.. entries.Select(x => x.Character).Distinct()];
 
             DrawTopPage(entries);
             DrawEntries(entries, "All");
@@ -51,6 +54,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             {
                 ImGui.InputText("Duty", ref dutyFilter);
                 ImGui.InputText("Job", ref jobFilter);
+                ImGui.Checkbox("All characters##header", ref allCharacters);
 
                 var filtered = entries.Where(e => e.Name.Contains(dutyFilter, StringComparison.OrdinalIgnoreCase) && (jobFilter == string.Empty || e.JobName.Contains(jobFilter, StringComparison.OrdinalIgnoreCase)));
                 DrawTable(filtered);
@@ -78,8 +82,10 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                     }
                     ImGui.Separator();
                     ImGui.Checkbox("Only Mentor Duties##FilterCheckbox", ref topMentorFilter);
-                    ImGui.Separator();
+                    ImGui.SameLine();
                     ImGui.Checkbox("By Time", ref topByTime);
+                    ImGui.SameLine();
+                    ImGui.Checkbox("All characters##Top", ref allCharacters);
                 }
 
                 DrawTopTable(entries);
@@ -90,7 +96,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
 
         private void DrawTopTable(IEnumerable<DutyEntry> entries)
         {
-            IEnumerable<IGrouping<(string Name, DutyType Type), DutyEntry>> grouped = entries.Where(e => !topMentorFilter || e.AsMentor).GroupBy(e => (e.Name, e.Type));
+            IEnumerable<IGrouping<(string Name, DutyType Type), DutyEntry>> grouped = entries.Where(e => (!topMentorFilter || e.AsMentor) && (allCharacters || e.Character == string.Empty || e.Character == Service.PlayerState.CharacterName)).GroupBy(e => (e.Name, e.Type));
             var filtered = grouped.Where(g => typeFilters[g.Key.Type]);
 
             if (ImGui.BeginTable("TopEntries", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Resizable))
@@ -157,12 +163,13 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
 
         private void DrawTable(IEnumerable<DutyEntry> entries)
         {
-            if (ImGui.BeginTable("Entries", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Resizable))
+            if (ImGui.BeginTable("Entries", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Resizable))
             {
                 ImGui.TableSetupColumn("Date");
                 ImGui.TableSetupColumn("Duty");
                 ImGui.TableSetupColumn("Job");
                 ImGui.TableSetupColumn("Time");
+                ImGui.TableSetupColumn("Character");
                 ImGui.TableSetupColumn("Actions");
                 ImGui.TableSetupScrollFreeze(0, 1);
                 ImGui.TableHeadersRow();
@@ -182,6 +189,8 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                     ImGui.Text(FormatTime(item.ElapsedTime));
 
                     ImGui.TableSetColumnIndex(4);
+                    ImGui.Text(item.Character);
+                    ImGui.TableSetColumnIndex(5);
                     if (ImGui.Button($"Open Details..."))
                     {
                         try

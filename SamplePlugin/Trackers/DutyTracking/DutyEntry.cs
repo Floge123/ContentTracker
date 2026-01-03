@@ -11,6 +11,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
         public TimeSpan ElapsedTime { get; set; }
         public string JobName { get; set; }
         public bool AsMentor { get; set; }
+        public string Character { get; set; }
 
         public DutyEntry(DutyType type, string name, uint id)
         {
@@ -19,7 +20,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             RowId = id;
         }
 
-        public DutyEntry(DateTime timeStamp, DutyType type, string name, TimeSpan time, string jobName, bool asMentor)
+        public DutyEntry(DateTime timeStamp, DutyType type, string name, TimeSpan time, string jobName, bool asMentor, string character)
         {
             TimeStamp = timeStamp;
             Name = name;
@@ -27,6 +28,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             ElapsedTime = time;
             JobName = jobName;
             AsMentor = asMentor;
+            Character = character;
         }
 
         public static DutyEntry FromCsv(string[] csv)
@@ -47,10 +49,15 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             {
                 asMentor = b;
             }
-            return new DutyEntry(timestamp, Enum.Parse<DutyType>(csv[1]), csv[2], time, csv[4], asMentor);
+            string character = string.Empty;
+            if (csv.Length > 6)
+            {
+                character = csv[6];
+            }
+            return new DutyEntry(timestamp, Enum.Parse<DutyType>(csv[1]), csv[2], time, csv[4], asMentor, character);
         }
 
-        public string AsCsv() => $"{TimeStamp:s},{Type},{Name.Replace(",", ";")},{ElapsedTime},{JobName},{AsMentor}";
+        public string AsCsv() => $"{TimeStamp:s},{Type},{Name.Replace(",", ";")},{ElapsedTime},{JobName},{AsMentor},{Character}";
 
         public bool Equals(DutyEntry? other)
         {
