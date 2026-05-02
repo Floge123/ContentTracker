@@ -11,6 +11,10 @@
         "DalamudApiLevel": 15,
         "Punchline": "Tracks duties",
         "IsHide": false,
-        "IsTestingExclusive": false
+        "IsTestingExclusive": false,
+        "DownloadLinkInstall": "https://example.com/path/to/release/output.zip",
+        "DownloadLinkTesting": "https://example.com/path/to/testing/output.zip",
+        "DownloadLinkUpdate": "https://example.com/path/to/release/output.zip",
+        "LastUpdate": "1701231234"
     }
 ]
