@@ -56,7 +56,10 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                 ImGui.InputText("Job", ref jobFilter);
                 ImGui.Checkbox("All characters##header", ref allCharacters);
 
-                var filtered = entries.Where(e => e.Name.Contains(dutyFilter, StringComparison.OrdinalIgnoreCase) && (jobFilter == string.Empty || e.JobName.Contains(jobFilter, StringComparison.OrdinalIgnoreCase)));
+                var filtered = entries.Where(e => e.Name.Contains(dutyFilter, StringComparison.OrdinalIgnoreCase) 
+                    && (jobFilter == string.Empty || e.JobName.Contains(jobFilter, StringComparison.OrdinalIgnoreCase))
+                    && (allCharacters || e.Character == string.Empty || e.Character == Service.PlayerState.CharacterName));
+
                 DrawTable(filtered);
 
                 ImGui.EndTabItem();

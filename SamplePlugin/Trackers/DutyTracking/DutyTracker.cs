@@ -1,4 +1,5 @@
 using Dalamud.Game.Command;
+using Dalamud.Game.DutyState;
 using Lumina.Excel.Sheets;
 using MentorRouletteCounter.Trackers;
 using MentorRouletteCounter.Trackers.DutyTracking;
@@ -52,6 +53,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
 
         private void AddCommand() => Service.Commands.AddHandler("/duty", new CommandInfo((command, arguments) =>
                                               {
+                                                Service.Chat.Print($"IsMentor: {Service.ObjectTable.LocalPlayer?.OnlineStatus.Value.Name.ToString().Contains("Mentor", StringComparison.OrdinalIgnoreCase) ?? false}");
                                                   if (string.IsNullOrEmpty(arguments))
                                                   {
                                                       Service.Chat.PrintError("No duty name provided to /duty.");
@@ -77,19 +79,17 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
             ShowInHelp = true,
         });
 
-        private void Duty_DutyStarted(object? sender, ushort e)
+        private void Duty_DutyStarted(IDutyStateEventArgs args)
         {
-            var territory = Service.GameData.Excel.GetSheet<TerritoryType>()?.GetRow(e);
-            var content = territory?.ContentFinderCondition.Value;
+            var content = args?.ContentFinderCondition.Value;
             Start(content);
         }
 
-        private void Duty_DutyCompleted(object? sender, ushort e)
+        private void Duty_DutyCompleted(IDutyStateEventArgs args)
         {
             try
             {
-                var territory = Service.GameData.Excel.GetSheet<TerritoryType>()?.GetRow(e);
-                var content = territory?.ContentFinderCondition.Value;
+                var content = args?.ContentFinderCondition.Value;
                 if (content is null)
                     return;
 
@@ -149,7 +149,7 @@ namespace MentorRouletteCounter.Trackers.DutyTracking
                 if (elapsedTime.TotalMinutes > 180)
                     elapsedTime = TimeSpan.Zero;
 
-                bool asMentor = Service.Client.LocalPlayer.OnlineStatus.Value.Name.ToString().Contains("Mentor", StringComparison.OrdinalIgnoreCase);
+                bool asMentor = Service.ObjectTable.LocalPlayer?.OnlineStatus.Value.Name.ToString().Contains("Mentor", StringComparison.OrdinalIgnoreCase) ?? false;
                 StoreDoneDuty(content, elapsedTime, asMentor);
 
                 PrintDutyInfo(content.Name.ToString());

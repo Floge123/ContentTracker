@@ -23,6 +23,8 @@ namespace MentorRouletteCounter
         [PluginService] public static IFramework Framework { get; private set; } = null!;
         [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
         [PluginService] internal static IPlayerState PlayerState { get; private set; } = null!;
+        [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
+
 
         public static readonly WindowSystem WindowSystem = new("Duty Tracker");
         // @formatter:on

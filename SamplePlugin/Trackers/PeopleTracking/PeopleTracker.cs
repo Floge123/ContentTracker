@@ -1,3 +1,4 @@
+using Dalamud.Game.DutyState;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using Lumina.Excel.Sheets;
 using MentorRouletteCounter.Trackers;
@@ -18,17 +19,17 @@ namespace MentorRouletteCounter.Trackers.PeopleTracking
             Service.Duty.DutyCompleted -= Duty_DutyCompleted;
         }
 
+
         public void Initialize()
         {
             Service.Duty.DutyCompleted += Duty_DutyCompleted;
         }
 
-        private void Duty_DutyCompleted(object? sender, ushort e)
+        private void Duty_DutyCompleted(IDutyStateEventArgs args)
         {
             try
             {
-                var territory = Service.GameData.Excel.GetSheet<TerritoryType>()?.GetRow(e);
-                var content = territory?.ContentFinderCondition.Value;
+                var content = args?.ContentFinderCondition.Value;
                 if (content is null)
                     return;
 
