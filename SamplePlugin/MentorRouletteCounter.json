@@ -2,13 +2,12 @@
   "Author": "Leni Tachikawa",
   "Name": "Duty Tracker",
   "Punchline": "Track duties completed with special attention to mentor roulettes.",
-  "Description": "A description that shows up in /xlplugins. List any major slash-command(s).",
-  "InternalName": "samplePlugin",
+  "Description": "Tracks duties done. Splits mentor duties from other duties. History can be seen with /dutytracker",
+  "InternalName": "DutyTracker",
+  "RepoUrl": "https://github.com/Floge123/ContentTracker",
   "ApplicableVersion": "any",
   "Tags": [
-    "sample",
-    "plugin",
-    "goats",
+    "duty",
     "tracker",
     "mentor"
   ]
