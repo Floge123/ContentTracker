@@ -1,0 +1,16 @@
+[
+    {
+        "Author": "Leni Tachikawa",
+        "Name": "Duty Tracker",
+        "Description": "Tracks duties done.",
+        "InternalName": "DutyTracker",
+        "AssemblyVersion": "1.0.2",
+        "TestingAssemblyVersion": null,
+        "RepoUrl": "https://github.com/Floge123/ContentTracker",
+        "ApplicableVersion": "any",
+        "DalamudApiLevel": 15,
+        "Punchline": "Tracks duties",
+        "IsHide": false,
+        "IsTestingExclusive": false
+    }
+]
